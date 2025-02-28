@@ -1,30 +1,21 @@
-// Import Firebase v11 modules using the modular API
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  orderBy,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCeuF96j720WmtcNe_JkajIRz9SF-5rkYk",
-  authDomain: "logbook-969dc.firebaseapp.com",
-  databaseURL: "https://logbook-969dc-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "logbook-969dc",
-  storageBucket: "logbook-969dc.firebasestorage.app",
-  messagingSenderId: "333508920254",
-  appId: "1:333508920254:web:fbde733cb8a577dbfd6fef"
-};
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyCeuF96j720WmtcNe_JkajIRz9SF-5rkYk",
+    authDomain: "logbook-969dc.firebaseapp.com",
+    databaseURL: "https://logbook-969dc-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "logbook-969dc",
+    storageBucket: "logbook-969dc.firebasestorage.app",
+    messagingSenderId: "333508920254",
+    appId: "1:333508920254:web:fbde733cb8a577dbfd6fef"
+  };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
 
 /**
  * Calculates total flight time given departure and arrival times in "HH:MM" format.
