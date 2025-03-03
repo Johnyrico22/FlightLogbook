@@ -10,8 +10,6 @@ const firebaseConfig = {
   messagingSenderId: "333508920254",
   appId: "1:333508920254:web:fbde733cb8a577dbfd6fef"
 };
-import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
