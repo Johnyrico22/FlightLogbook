@@ -1,17 +1,6 @@
-// Import the functions you need from the CDN (Firebase 11.4.0)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import {
-  getDatabase,
-  ref,
-  push,
-  set,
-  onValue,
-  update,
-  query,
-  orderByChild
-} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { initializeApp } from "firebase/app";
+import { getDatabase } from "firebase/database";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCeuF96j720WmtcNe_JkajIRz9SF-5rkYk",
   authDomain: "logbook-969dc.firebaseapp.com",
@@ -21,8 +10,9 @@ const firebaseConfig = {
   messagingSenderId: "333508920254",
   appId: "1:333508920254:web:fbde733cb8a577dbfd6fef"
 };
+import { initializeApp } from "firebase/app";
+import { getDatabase } from "firebase/database";
 
-// Initialize Firebase and the Realtime Database
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
