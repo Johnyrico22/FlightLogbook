@@ -40,52 +40,6 @@ function calculateFlightTime(departureTime, arrivalTime) {
   const minutes = diff % 60;
   return `${hours}h ${minutes}m`;
 }
-// Import Firebase Realtime Database functions from the CDN
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import {
-  getDatabase,
-  ref,
-  push,
-  set,
-  onValue,
-  update,
-  remove,
-  query,
-  orderByChild
-} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-
-// Your Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCeuF96j720WmtcNe_JkajIRz9SF-5rkYk",
-  authDomain: "logbook-969dc.firebaseapp.com",
-  databaseURL: "https://logbook-969dc-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "logbook-969dc",
-  storageBucket: "logbook-969dc.firebasestorage.app",
-  messagingSenderId: "333508920254",
-  appId: "1:333508920254:web:fbde733cb8a577dbfd6fef"
-};
-
-// Initialize Firebase and the Realtime Database
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-/**
- * Calculates total flight time given departure and arrival times in "HH:MM" format.
- */
-function calculateFlightTime(departureTime, arrivalTime) {
-  const [depHours, depMinutes] = departureTime.split(":").map(Number);
-  const [arrHours, arrMinutes] = arrivalTime.split(":").map(Number);
-  let depTotal = depHours * 60 + depMinutes;
-  let arrTotal = arrHours * 60 + arrMinutes;
-  // Handle flights that cross midnight
-  if (arrTotal < depTotal) {
-    arrTotal += 24 * 60;
-  }
-  const diff = arrTotal - depTotal;
-  const hours = Math.floor(diff / 60);
-  const minutes = diff % 60;
-  return `${hours}h ${minutes}m`;
-}
 
 // -----------------------------
 // Logbook Page Code using Grid.js
