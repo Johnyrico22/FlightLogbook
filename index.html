@@ -3,33 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <title>Flight Logbook</title>
+  <!-- Grid.js CSS (choose your preferred theme) -->
+  <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <h1>Flight Logbook</h1>
-  <table id="logbook-table">
-    <thead>
-      <tr>
-        <th>Date <input type="text" data-column="date" placeholder="Filter"></th>
-        <th>Aircraft <input type="text" data-column="aircraft" placeholder="Filter"></th>
-        <th>Registration <input type="text" data-column="registration" placeholder="Filter"></th>
-        <th>Name <input type="text" data-column="name" placeholder="Filter"></th>
-        <th>Designation <input type="text" data-column="designation" placeholder="Filter"></th>
-        <th>Departure Point <input type="text" data-column="departurePoint" placeholder="Filter"></th>
-        <th>Departure Time <input type="text" data-column="departureTime" placeholder="Filter"></th>
-        <th>Arrival Point <input type="text" data-column="arrivalPoint" placeholder="Filter"></th>
-        <th>Arrival Time <input type="text" data-column="arrivalTime" placeholder="Filter"></th>
-        <th>Total Flight Time</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Blank row to add a new entry -->
-      <tr data-id="new">
-        <td colspan="10"><a href="entry.html?id=new">Add New Entry</a></td>
-      </tr>
-      <!-- Existing log entries will be injected here by app.js -->
-    </tbody>
-  </table>
+  <!-- The grid will render inside this div -->
+  <div id="gridjs-logbook"></div>
+  
+  <!-- Grid.js UMD build -->
+  <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+  <!-- Your application code -->
   <script type="module" src="app.js"></script>
 </body>
 </html>

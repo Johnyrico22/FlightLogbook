@@ -5,7 +5,7 @@ import {
   push,
   set,
   onValue,
-  update,
+  update,remove, 
   query,
   orderByChild
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
@@ -42,75 +42,81 @@ function calculateFlightTime(departureTime, arrivalTime) {
 }
 
 // -----------------------------
-// Code for index.html (logbook list)
+// Logbook Page Code using Grid.js
 // -----------------------------
-if (document.getElementById("logbook-table")) {
-  /**
-   * Loads log entries from the Realtime Database and populates the table.
-   * The entries are ordered by date (ascending) and then reversed for descending order.
-   */
+if (document.getElementById("gridjs-logbook")) {
   function loadEntries() {
     const logbookRef = ref(db, "logbook");
-    // Order entries by the "date" child; note that this orders ascending.
+    // Order entries by the "date" field (ascending order)
     const logbookQuery = query(logbookRef, orderByChild("date"));
-
+    
     onValue(logbookQuery, (snapshot) => {
       const data = snapshot.val();
       let entries = [];
-      // Convert the object into an array of entries
+      // Convert the object into an array of entries with their IDs
       for (let id in data) {
         entries.push({ id, ...data[id] });
       }
-      // Sort entries descending by date (assuming date strings are in a sortable format, e.g., "YYYY-MM-DD")
+      // Sort entries descending by date (assuming date is in "YYYY-MM-DD" format)
       entries.sort((a, b) => b.date.localeCompare(a.date));
-
-      const tbody = document.querySelector("#logbook-table tbody");
-      // Clear existing rows and add the blank "Add New Entry" row at the top.
-      tbody.innerHTML = `
-        <tr data-id="new">
-          <td colspan="10"><a href="entry.html?id=new">Add New Entry</a></td>
-        </tr>
-      `;
-
-      // Append each entry as a row
-      entries.forEach((entry) => {
-        const tr = document.createElement("tr");
-        tr.addEventListener("click", () => {
-          window.location.href = `entry.html?id=${entry.id}`;
-        });
-        tr.innerHTML = `
-          <td>${entry.date}</td>
-          <td>${entry.aircraft}</td>
-          <td>${entry.registration}</td>
-          <td>${entry.name}</td>
-          <td>${entry.designation}</td>
-          <td>${entry.departurePoint}</td>
-          <td>${entry.departureTime}</td>
-          <td>${entry.arrivalPoint}</td>
-          <td>${entry.arrivalTime}</td>
-          <td>${calculateFlightTime(entry.departureTime, entry.arrivalTime)}</td>
-        `;
-        tbody.appendChild(tr);
+      
+      // Store entries globally for use in the row click handler
+      window.logbookEntries = entries;
+      
+      // Prepare data for Grid.js:
+      // The first (blank) row is for adding a new entry.
+      let gridData = [];
+      gridData.push(["", "", "", "", "", "", "", "", "", ""]);
+      // Append each entry as an array of values
+      entries.forEach(entry => {
+        gridData.push([
+          entry.date,
+          entry.aircraft,
+          entry.registration,
+          entry.name,
+          entry.designation,
+          entry.departurePoint,
+          entry.departureTime,
+          entry.arrivalPoint,
+          entry.arrivalTime,
+          calculateFlightTime(entry.departureTime, entry.arrivalTime)
+        ]);
       });
+      
+      // Render the grid using Grid.js
+      new gridjs.Grid({
+        columns: [
+          "Date",
+          "Aircraft",
+          "Registration",
+          "Name",
+          "Designation",
+          "Departure Point",
+          "Departure Time",
+          "Arrival Point",
+          "Arrival Time",
+          "Total Flight Time"
+        ],
+        data: gridData,
+        sort: true,
+        pagination: {
+          enabled: false
+        },
+        // When a row is clicked, navigate to the entry page:
+        // Row 0 (blank) opens the 'new entry' page; others open the corresponding entry.
+        onRowClick: (row, rowIndex) => {
+          if (rowIndex === 0) {
+            window.location.href = "entry.html?id=new";
+          } else {
+            const entryId = window.logbookEntries[rowIndex - 1].id;
+            window.location.href = `entry.html?id=${entryId}`;
+          }
+        }
+      }).render(document.getElementById("gridjs-logbook"));
     });
   }
+  
   loadEntries();
-
-  // Basic filter functionality for table columns
-  document.querySelectorAll("thead input").forEach((input) => {
-    input.addEventListener("keyup", function () {
-      const colIndex = this.parentElement.cellIndex;
-      const filter = this.value.toUpperCase();
-      const rows = document.querySelectorAll('#logbook-table tbody tr:not([data-id="new"])');
-      rows.forEach((row) => {
-        const cell = row.cells[colIndex];
-        if (cell) {
-          const textValue = cell.textContent || cell.innerText;
-          row.style.display = textValue.toUpperCase().includes(filter) ? "" : "none";
-        }
-      });
-    });
-  });
 }
 
 // -----------------------------
@@ -121,7 +127,7 @@ if (document.getElementById("log-entry-form")) {
   const id = urlParams.get("id");
   const form = document.getElementById("log-entry-form");
 
-  // If editing an existing entry, load its data from the Realtime Database.
+  // If editing an existing entry, load its data and add a delete button.
   if (id && id !== "new") {
     const entryRef = ref(db, "logbook/" + id);
     onValue(entryRef, (snapshot) => {
@@ -138,9 +144,34 @@ if (document.getElementById("log-entry-form")) {
         form.arrivalTime.value = data.arrivalTime;
       }
     }, { onlyOnce: true });
+
+    // Create a Delete button for removing the entry.
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete Entry";
+    deleteButton.type = "button"; // Ensure it doesn't trigger form submission.
+    deleteButton.style.backgroundColor = "#d9534f"; // Optional styling (red)
+    deleteButton.style.color = "white";
+    deleteButton.style.marginTop = "20px";
+
+    form.appendChild(deleteButton);
+
+    // Attach a click event that asks for confirmation before deletion.
+    deleteButton.addEventListener("click", async () => {
+      const confirmed = confirm("Are you sure you want to delete this entry?");
+      if (confirmed) {
+        try {
+          await remove(entryRef);
+          alert("Entry deleted.");
+          window.location.href = "index.html";
+        } catch (error) {
+          console.error("Error deleting entry:", error);
+          alert("Failed to delete entry.");
+        }
+      }
+    });
   }
 
-  // Handle form submission for creating/updating an entry
+  // Handle form submission for creating/updating an entry.
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const entryData = {
@@ -157,15 +188,15 @@ if (document.getElementById("log-entry-form")) {
 
     try {
       if (id && id !== "new") {
-        // Update an existing entry
+        // Update an existing entry.
         const entryRef = ref(db, "logbook/" + id);
         await update(entryRef, entryData);
       } else {
-        // Add a new entry using push to generate a new key
+        // Add a new entry using push to generate a new key.
         const newEntryRef = push(ref(db, "logbook"));
         await set(newEntryRef, entryData);
       }
-      // Redirect back to the logbook page after saving
+      // Redirect back to the logbook page after saving.
       window.location.href = "index.html";
     } catch (error) {
       console.error("Error saving entry: ", error);
