@@ -83,7 +83,7 @@ if (document.getElementById("gridjs-logbook")) {
         ]);
       });
       
-      // Render the grid using Grid.js
+      // Render the grid using Grid.js with rowClick property
       new gridjs.Grid({
         columns: [
           "Date",
@@ -102,9 +102,7 @@ if (document.getElementById("gridjs-logbook")) {
         pagination: {
           enabled: false
         },
-        // When a row is clicked, navigate to the entry page:
-        // Row 0 (blank) opens the 'new entry' page; others open the corresponding entry.
-        onRowClick: (row, rowIndex) => {
+        rowClick: (row, rowIndex) => {
           if (rowIndex === 0) {
             window.location.href = "entry.html?id=new";
           } else {
@@ -118,6 +116,7 @@ if (document.getElementById("gridjs-logbook")) {
   
   loadEntries();
 }
+
 
 // -----------------------------
 // Code for entry.html (log entry form)
