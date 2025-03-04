@@ -17,6 +17,32 @@
     <label>Departure Time: <input type="time" name="departureTime" required></label>
     <label>Arrival Point: <input type="text" name="arrivalPoint" required></label>
     <label>Arrival Time: <input type="time" name="arrivalTime" required></label>
+    <label>Flight Type:
+      <input type="radio" name="flightType" value="single" checked> Single
+      <input type="radio" name="flightType" value="dual"> Dual
+    </label>
+    <label>Instrument:
+      <input type="time" name="instrument">
+    </label>
+    <label>Take Offs:
+      <input type="number" name="takeOffs" value="1" min="0">
+    </label>
+    <label>Landings:
+      <input type="number" name="landings" value="1" min="0">
+    </label>
+    <label>Day Hours:
+      <input type="time" name="dayHours">
+    </label>
+    <label>Night Hours:
+      <input type="time" name="nightHours">
+    </label>
+    <label>Taco Finish:
+      <input type="number" name="tacoFinish" step="0.1">
+    </label>
+    <label>Hobbs Finish:
+      <input type="number" name="hobbsFinish" step="0.1">
+    </label>
+    
     <button type="submit">Save Entry</button>
   </form>
   <script type="module" src="app.js"></script>

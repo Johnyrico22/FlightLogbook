@@ -1,57 +1,254 @@
+/* Overall Page Styling */
 body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f0f8ff;  /* Light, airy blue background */
+  margin: 20px;
+}
+
+h1 {
+  color: #003366;  /* Dark blue heading */
+  text-align: center;
+}
+/* ---------------------------
+   Mobile Card Layout Styling
+---------------------------- */
+
+@media (max-width: 800px) {
+  /* Hide table view container */
+  #tabulator-table {
+    display: none;
   }
   
-  h1 {
-    text-align: center;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-  }
-  
-  table, th, td {
-    border: 1px solid #ccc;
-  }
-  
-  th, td {
-    padding: 8px;
-    text-align: left;
-  }
-  
-  th input {
-    width: 90%;
-    margin-top: 4px;
-    padding: 4px;
-  }
-  
-  tr:hover {
-    background-color: #f5f5f5;
-  }
-  
-  form {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-  
-  form label {
+  /* Mobile cards container */
+  #mobile-cards-container {
     display: block;
-    margin: 10px 0;
   }
   
-  form input {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
+  .card {
+    background-color: #ffffff;
+    border: 1px solid #b3d1ff;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    white-space: normal;
+    word-wrap: break-word;
   }
   
-  form button {
-    padding: 10px 20px;
-    margin-top: 20px;
-    display: block;
-    width: 100%;
+  .card h3 {
+    margin-top: 0;
+    color: #003366;
+    font-size: 1.1em;
   }
   
+  .card p {
+    margin: 5px 0;
+    color: #003366;
+    font-size: 0.95em;
+    white-space: normal;
+    word-wrap: break-word;
+  }
+}
+
+/* Controls Container Styling */
+#controls-container {
+  background-color: #e6f2ff;  /* Very light blue background */
+  border: 1px solid #b3d1ff;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Buttons Styling */
+#controls-container button {
+  background-color: #66b3ff;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 10px 15px;
+  margin: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+#controls-container button:hover {
+  background-color: #3399ff;
+}
+
+/* Column Selector Panel Styling */
+#column-selector-panel {
+  display: none;  /* Initially hidden */
+  background-color: #f7fbff;
+  border: 1px solid #b3d1ff;
+  border-radius: 3px;
+  padding: 10px;
+  margin-top: 10px;
+  text-align: left;
+}
+
+#column-selector-panel label {
+  margin-right: 10px;
+  font-size: 0.9em;
+}
+
+/* ---------------------------
+   Tabulator Table Styling
+---------------------------- */
+
+/* The main Tabulator container */
+#tabulator-table .tabulator {
+  background-color: #ffffff; /* White background for table body */
+  border: 1px solid #b3d1ff;  /* Light blue border */
+  border-radius: 5px;
+}
+
+#tabulator-table .tabulator-header {
+  background-color: #f0faff !important; /* Very light blue */
+  border-bottom: 1px solid #d0eaff !important;
+  font-size: 0.75em;
+}
+
+/* Override default Tabulator header background color */
+#tabulator-table .tabulator-col {
+  background-color: #e6f2ff !important; /* Light blue */
+}
+
+/* Force header title styling */
+#tabulator-table .tabulator-col .tabulator-col-title {
+  white-space: normal !important;
+  word-break: break-word !important;
+  text-align: center !important;
+  padding: 5px !important;
+  color: #003366 !important;
+}
+
+/* Row styling with alternating colors */
+#tabulator-table .tabulator-row {
+  border-bottom: 1px solid #e6f7ff;
+  background-color: #ffffff;
+}
+
+#tabulator-table .tabulator-row:nth-child(even) {
+  background-color: #f7fbff; /* Light blue tint for alternate rows */
+}
+
+/* Cell styling */
+#tabulator-table .tabulator-cell {
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  word-break: break-all; /* optional: breaks long words if needed */
+}
+
+/* Hover effect on rows */
+#tabulator-table .tabulator-row:hover {
+  background-color: #d0e6ff; /* Slightly darker blue on hover */
+}
+
+/* Fallback Basic Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table, th, td {
+  border: 1px solid #ccc;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+}
+
+th input {
+  width: 90%;
+  margin-top: 4px;
+  padding: 4px;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Form Styling */
+form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+form label {
+  display: block;
+  margin: 10px 0;
+}
+
+form input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+form button {
+  padding: 10px 20px;
+  margin-top: 20px;
+  display: block;
+  width: 100%;
+}
+
+/* Filter Container Styling */
+#filter-container {
+  background-color: #e6f2ff;
+  border: 1px solid #b3d1ff;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#filter-container input {
+  width: 80%;
+  padding: 10px;
+  border: 1px solid #b3d1ff;
+  border-radius: 3px;
+  font-size: 1em;
+}
+
+/* Summary Container Styling */
+#summary-container {
+  background-color: #e6f2ff;  /* Very light blue background */
+  border: 1px solid #b3d1ff;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #003366;
+}
+
+/* Flex container for summary cards */
+.summary-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+/* Individual summary card styling */
+.summary-card {
+  background-color: #f7fbff;
+  border: 1px solid #b3d1ff;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px;
+  flex: 1 1 150px;  /* Flexible cards with a minimum width */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.summary-card p {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.summary-card h3 {
+  margin: 5px 0 0 0;
+  font-size: 1.2em;
+}

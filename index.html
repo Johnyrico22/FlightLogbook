@@ -3,21 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <title>Flight Logbook</title>
-  <!-- Grid.js CSS (using the Mermaid theme) -->
-  <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+  <!-- Tabulator CSS -->
+  <link href="https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator.min.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <h1>Flight Logbook</h1>
-  <!-- Add New Entry Button -->
-  <button id="add-entry-btn">Add New Entry</button>
+    <!-- Summary Container -->
+    <div id="summary-container"></div>
   
-  <!-- Grid container -->
-  <div id="gridjs-logbook"></div>
+  <!-- Controls Container -->
+  <div id="controls-container">
+    <button id="add-entry-btn">Add New Entry</button>
+    <button id="column-selector-btn">Select Columns</button>
+    <button id="import-btn">Import Flight Data</button>
+    
+    <!-- Column Selector Panel -->
+    <div id="column-selector-panel">
+      <label><input type="checkbox" data-field="date" checked> Date</label>
+      <label><input type="checkbox" data-field="aircraft" checked> Aircraft</label>
+      <label><input type="checkbox" data-field="registration" checked> Registration</label>
+      <label><input type="checkbox" data-field="name" checked> Name</label>
+      <label><input type="checkbox" data-field="designation" checked> Designation</label>
+      <label><input type="checkbox" data-field="departurePoint" checked> Departure Point</label>
+      <label><input type="checkbox" data-field="departureTime" checked> Departure Time</label>
+      <label><input type="checkbox" data-field="arrivalPoint" checked> Arrival Point</label>
+      <label><input type="checkbox" data-field="arrivalTime" checked> Arrival Time</label>
+      <label><input type="checkbox" data-field="totalFlightTime" checked> Total Flight Time</label>
+      <label><input type="checkbox" data-field="single" checked> Single</label>
+      <label><input type="checkbox" data-field="dual" checked> Dual</label>
+      <label><input type="checkbox" data-field="instrument" checked> Instrument</label>
+      <label><input type="checkbox" data-field="takeOffs" checked> Take Offs</label>
+      <label><input type="checkbox" data-field="landings" checked> Landings</label>
+      <label><input type="checkbox" data-field="dayHours" checked> Day Hours</label>
+      <label><input type="checkbox" data-field="nightHours" checked> Night Hours</label>
+      <label><input type="checkbox" data-field="tacoFinish" checked> Taco Finish</label>
+      <label><input type="checkbox" data-field="hobbsFinish" checked> Hobbs Finish</label>
+      <br>
+      <button id="apply-columns-btn">Apply</button>
+    </div>
+  </div>
+
+   <!-- Filter Container -->
+   <div id="filter-container">
+    <input type="text" id="filter-input" placeholder="Type to filter logbook entries..." />
+  </div>
+
+  <!-- Container for mobile cards -->
+  <div id="mobile-cards-container" style="display:none;"></div>
   
-  <!-- Grid.js UMD build -->
-  <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+  <!-- Container for table view -->
+  <div id="tabulator-table"></div>
+  
+  <!-- Tabulator JS -->
+  <script src="https://unpkg.com/tabulator-tables@5.4.3/dist/js/tabulator.min.js"></script>
   <!-- Your application code -->
   <script type="module" src="app.js"></script>
+  <!-- Day.js and Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/plugin/customParseFormat.js"></script>
 </body>
 </html>

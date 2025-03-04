@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Import Flight Data</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- PapaParse CDN for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <!-- Day.js and customParseFormat plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/plugin/customParseFormat.js"></script>
+</head>
+<body>
+  <h1>Import Flight Data</h1>
+  <p>Please format your CSV file with one row per flight entry and the following headers:</p>
+  <ul>
+    <li>date (e.g., YYYY-MM-DD, MM/DD/YYYY, etc.)</li>
+    <li>aircraft</li>
+    <li>registration</li>
+    <li>name</li>
+    <li>designation</li>
+    <li>departurePoint</li>
+    <li>departureTime (e.g., HH:mm)</li>
+    <li>arrivalPoint</li>
+    <li>arrivalTime (e.g., HH:mm)</li>
+    <li>flightType (either "single" or "dual")</li>
+    <li>instrument (HH:mm)</li>
+    <li>takeOffs (integer)</li>
+    <li>landings (integer)</li>
+    <li>dayHours (HH:mm)</li>
+    <li>nightHours (HH:mm)</li>
+    <li>tacoFinish (number with one decimal)</li>
+    <li>hobbsFinish (number with one decimal)</li>
+  </ul>
+  <p>Drag and drop your CSV file below, or click the area to select the file.</p>
+  <div id="drop-zone" style="border: 2px dashed #ccc; padding: 20px; text-align: center; cursor:pointer;">
+    Drop CSV file here or click to upload.
+    <input type="file" id="file-input" accept=".csv" style="display:none;">
+  </div>
+  <div id="preview-container" style="margin-top:20px;"></div>
+  <div id="import-actions" style="display:none; margin-top:20px;">
+    <button id="cancel-import">Cancel</button>
+    <button id="accept-import">Import</button>
+  </div>
+  <script type="module" src="import.js"></script>
+</body>
+</html>
