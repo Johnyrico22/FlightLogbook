@@ -5,6 +5,14 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChang
 const auth = getAuth();
 const provider = new GoogleAuthProvider();
 
+// Listen for auth state changes.
+onAuthStateChanged(auth, (user) => {
+    // If not signed in and not already on login.html, redirect to login page.
+    if (!user && !window.location.pathname.endsWith("login.html")) {
+      window.location.href = "login.html";
+    }
+  });
+
 // Function to sign in with Google using a popup.
 export function signIn() {
   signInWithPopup(auth, provider)
