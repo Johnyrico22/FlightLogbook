@@ -15,8 +15,8 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     // If user is signed in, show their display name and a sign-out button.
     authContainer.innerHTML = `
-      <p>Signed in as <strong>${user.displayName}</strong></p>
-      <button id="sign-out-btn">Sign Out</button>
+      <p>Signed in as <strong>${user.displayName}</strong>
+      <button id="sign-out-btn">Sign Out</button></p>
     `;
     document.getElementById("sign-out-btn").addEventListener("click", () => {
       signOut(auth)
