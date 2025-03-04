@@ -1,5 +1,5 @@
 // logbook.js
-import { db, calculateFlightTime } from "./firebase.js";
+import { db, calculateFlightTime, minutesToTime, getFlightMinutes } from "./firebase.js";
 import {
   ref,
   query,
