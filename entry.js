@@ -8,15 +8,25 @@ import {
   push,
   set
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   if (!document.getElementById("log-entry-form")) return;
   
   const auth = getAuth();
-  // Redirect to login if user is not authenticated.
+
+  // If no user is signed in, initiate a Google sign-in popup and reload page on success.
   if (!auth.currentUser) {
-    window.location.href = "login.html";
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        console.log("Signed in as:", result.user.displayName);
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.error("Sign in error:", error);
+        alert("You must sign in to add or edit entries.");
+      });
     return;
   }
   
