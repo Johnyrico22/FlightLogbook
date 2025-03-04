@@ -208,7 +208,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
   
-  loadEntriesOnce();
+  // Remove the initial call to loadEntriesOnce
+  // loadEntriesOnce();
   
   // Listen for window resize events to update view.
   window.addEventListener("resize", () => {
