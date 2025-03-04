@@ -1,21 +1,23 @@
-import { getAuth, GoogleAuthProvider, signInWithRedirect } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+// auth.js
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
+// Initialize authentication and Google provider.
 const auth = getAuth();
 const provider = new GoogleAuthProvider();
-signInWithRedirect(auth, provider);
 
-
+// Function to sign in with Google using a popup.
 export function signIn() {
   signInWithPopup(auth, provider)
     .then((result) => {
       console.log("Signed in as:", result.user.displayName);
-      // Optionally, redirect or update UI.
+      // No auto redirect here—your app can react via onAuthStateChanged.
     })
     .catch((error) => {
       console.error("Sign in error:", error);
     });
 }
 
+// Function to sign out.
 export function signOutUser() {
   signOut(auth)
     .then(() => {
@@ -26,13 +28,13 @@ export function signOutUser() {
     });
 }
 
-// Listen for authentication state changes.
+// Listen for auth state changes and update the UI accordingly.
 onAuthStateChanged(auth, (user) => {
   const authContainer = document.getElementById("auth-container");
   if (!authContainer) return;
   
   if (user) {
-    // When signed in, show the user's display name and a sign-out button.
+    // When signed in, show user's display name and a sign-out button.
     authContainer.innerHTML = `
       <p>Signed in as <strong>${user.displayName}</strong></p>
       <button id="sign-out-btn">Sign Out</button>
@@ -44,3 +46,5 @@ onAuthStateChanged(auth, (user) => {
     document.getElementById("sign-in-btn").addEventListener("click", signIn);
   }
 });
+
+export { auth };
