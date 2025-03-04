@@ -10,16 +10,19 @@ import {
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOMContentLoaded event fired"); // Add this line
+  console.log("DOMContentLoaded event fired");
 
   // Ensure required containers exist.
-  if (!document.getElementById("tabulator-table") || !document.getElementById("mobile-cards-container")) return;
+  if (!document.getElementById("tabulator-table") || !document.getElementById("mobile-cards-container")) {
+    console.log("Required elements are not found in the DOM.");
+    return;
+  }
 
   const auth = getAuth();
   
   // Use auth state listener to ensure a user is signed in.
   onAuthStateChanged(auth, (user) => {
-    console.log("Auth state changed:", user); // Add this line
+    console.log("Auth state changed:", user);
     if (!user) {
       window.location.href = "login.html";
     } else {
@@ -67,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Render view (table or mobile cards) based on screen width.
   function renderView(entries) {
-    console.log("Rendering view with entries:", entries); // Add this line to log entries being rendered
+    console.log("Rendering view with entries:", entries);
     const newViewMode = window.innerWidth < 800 ? "mobile" : "desktop";
     currentViewMode = newViewMode;
     
@@ -179,19 +182,25 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Load entries once from Firebase filtered by authenticated user's UID.
   function loadEntriesOnce() {
-    console.log("loadEntriesOnce called"); // Add this line
+    console.log("loadEntriesOnce called");
     const logbookRef = ref(db, "logbook");
     const auth = getAuth();
     const user = auth.currentUser;
     if (!user) {
-      console.log("No user is authenticated"); // Add this line
+      console.log("No user is authenticated");
       return;
     }
     
+    console.log("User ID:", user.uid); // Add this line
     const logbookQuery = query(logbookRef, orderByChild("userId"), equalTo(user.uid));
+    console.log("Query created:", logbookQuery); // Add this line
     onValue(logbookQuery, (snapshot) => {
       const data = snapshot.val();
-      console.log("Fetched data:", data); // Add this line to log fetched data
+      console.log("Fetched data:", data);
+      if (!data) {
+        console.log("No data found for the user.");
+        return;
+      }
       let entries = [];
       for (let id in data) {
         entries.push({ id, ...data[id] });
@@ -205,11 +214,10 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // Render view.
       renderView(entriesCache);
+    }, (error) => {
+      console.error("Error fetching data:", error); // Add this line
     });
   }
-  
-  // Remove the initial call to loadEntriesOnce
-  // loadEntriesOnce();
   
   // Listen for window resize events to update view.
   window.addEventListener("resize", () => {
