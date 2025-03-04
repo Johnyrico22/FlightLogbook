@@ -64,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Render view (table or mobile cards) based on screen width.
   function renderView(entries) {
+    console.log("Rendering view with entries:", entries); // Add this line to log entries being rendered
     const newViewMode = window.innerWidth < 800 ? "mobile" : "desktop";
     currentViewMode = newViewMode;
     
@@ -183,6 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const logbookQuery = query(logbookRef, orderByChild("userId"), equalTo(user.uid));
     onValue(logbookQuery, (snapshot) => {
       const data = snapshot.val();
+      console.log("Fetched data:", data); // Add this line to log fetched data
       let entries = [];
       for (let id in data) {
         entries.push({ id, ...data[id] });
