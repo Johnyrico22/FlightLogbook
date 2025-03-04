@@ -8,21 +8,41 @@
 <body>
   <h1>Log Entry</h1>
   <form id="log-entry-form">
-    <label>Date: <input type="date" name="date" required></label>
-    <label>Aircraft: <input type="text" name="aircraft" required></label>
-    <label>Registration: <input type="text" name="registration" required></label>
-    <label>Name: <input type="text" name="name" required></label>
-    <label>Designation: <input type="text" name="designation" required></label>
-    <label>Departure Point: <input type="text" name="departurePoint" required></label>
-    <label>Departure Time: <input type="time" name="departureTime" required></label>
-    <label>Arrival Point: <input type="text" name="arrivalPoint" required></label>
-    <label>Arrival Time: <input type="time" name="arrivalTime" required></label>
+    <label>Date: 
+      <input type="date" name="date" required>
+    </label>
+    <label>Aircraft: 
+      <input type="text" name="aircraft" required>
+    </label>
+    <label>Registration: 
+      <input type="text" name="registration" required>
+    </label>
+    <label>Name: 
+      <input type="text" name="name" required>
+    </label>
+    <label>Designation: 
+      <input type="text" name="designation" required>
+    </label>
+    <label>Departure Point: 
+      <input type="text" name="departurePoint" required>
+    </label>
+    <label>Departure Time: 
+      <input type="time" name="departureTime" required>
+    </label>
+    <label>Arrival Point: 
+      <input type="text" name="arrivalPoint" required>
+    </label>
+    <label>Arrival Time: 
+      <input type="time" name="arrivalTime" required>
+    </label>
     <label>Flight Type:
       <input type="radio" name="flightType" value="single" checked> Single
       <input type="radio" name="flightType" value="dual"> Dual
     </label>
+    <!-- Instrument time split into hours and minutes -->
     <label>Instrument:
-      <input type="time" name="instrument">
+      <input type="number" id="instrumentH" name="instrumentH" placeholder="HH" min="0"> 
+      <input type="number" id="instrumentM" name="instrumentM" placeholder="MM" min="0" max="59">
     </label>
     <label>Take Offs:
       <input type="number" name="takeOffs" value="1" min="0">
@@ -30,11 +50,15 @@
     <label>Landings:
       <input type="number" name="landings" value="1" min="0">
     </label>
+    <!-- Day Hours split into separate hour and minute inputs -->
     <label>Day Hours:
-      <input type="time" name="dayHours">
+      <input type="number" id="dayHoursH" name="dayHoursH" placeholder="HH" min="0">
+      <input type="number" id="dayHoursM" name="dayHoursM" placeholder="MM" min="0" max="59">
     </label>
+    <!-- Night Hours split into separate hour and minute inputs -->
     <label>Night Hours:
-      <input type="time" name="nightHours">
+      <input type="number" id="nightHoursH" name="nightHoursH" placeholder="HH" min="0">
+      <input type="number" id="nightHoursM" name="nightHoursM" placeholder="MM" min="0" max="59">
     </label>
     <label>Taco Finish:
       <input type="number" name="tacoFinish" step="0.1">
