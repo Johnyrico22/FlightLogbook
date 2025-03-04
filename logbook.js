@@ -10,6 +10,8 @@ import {
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOMContentLoaded event fired"); // Add this line
+
   // Ensure required containers exist.
   if (!document.getElementById("tabulator-table") || !document.getElementById("mobile-cards-container")) return;
 
@@ -17,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Use auth state listener to ensure a user is signed in.
   onAuthStateChanged(auth, (user) => {
+    console.log("Auth state changed:", user); // Add this line
     if (!user) {
       window.location.href = "login.html";
     } else {
@@ -176,10 +179,14 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Load entries once from Firebase filtered by authenticated user's UID.
   function loadEntriesOnce() {
+    console.log("loadEntriesOnce called"); // Add this line
     const logbookRef = ref(db, "logbook");
     const auth = getAuth();
     const user = auth.currentUser;
-    if (!user) return;
+    if (!user) {
+      console.log("No user is authenticated"); // Add this line
+      return;
+    }
     
     const logbookQuery = query(logbookRef, orderByChild("userId"), equalTo(user.uid));
     onValue(logbookQuery, (snapshot) => {
