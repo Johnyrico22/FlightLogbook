@@ -2,19 +2,18 @@
 
 // Import Firebase functionality from our local firebase.js file.
 import { db } from "./firebase.js";
-
 import {
   ref,
   push,
   set
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 // Ensure Day.js and its plugin are loaded before using them
 document.addEventListener('DOMContentLoaded', () => {
   // Retrieve Day.js and its customParseFormat plugin from the global scope.
   const dayjs = window.dayjs;
   const customParseFormat = window.dayjs_plugin_customParseFormat;
-
   if (dayjs && customParseFormat) {
     dayjs.extend(customParseFormat);
   } else {
@@ -201,6 +200,15 @@ document.addEventListener('DOMContentLoaded', () => {
       alert("No data to import.");
       return;
     }
+    
+    // Retrieve the current authenticated user
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      alert("No authenticated user. Please sign in and try again.");
+      return;
+    }
+    
     let importedCount = 0;
     for (const row of csvData) {
       row.date = parseDate(row.date);
@@ -215,6 +223,9 @@ document.addEventListener('DOMContentLoaded', () => {
         row.dual = totalFlight;
         row.single = "";
       }
+      
+      // Add the authenticated user's UID to the row.
+      row.userId = currentUser.uid;
       
       const newEntryRef = push(ref(db, "logbook"));
       try {
