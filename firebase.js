@@ -1,6 +1,7 @@
 // firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCeuF96j720WmtcNe_JkajIRz9SF-5rkYk",
@@ -14,6 +15,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
 
 /**
  * Returns flight duration in minutes given departure and arrival times ("HH:MM").
@@ -61,4 +63,4 @@ if (typeof window.dayjs !== "undefined" && window.dayjs_plugin_customParseFormat
     window.dayjs.extend(window.dayjs_plugin_customParseFormat);
   }
 
-export { db, getFlightMinutes, calculateFlightTime, timeToMinutes, minutesToTime };
+export { db, getFlightMinutes, calculateFlightTime, timeToMinutes, minutesToTime, auth };

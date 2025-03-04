@@ -4,70 +4,18 @@
   <meta charset="UTF-8">
   <title>Login - Flight Logbook</title>
   <link rel="stylesheet" href="styles.css">
-  <style>
-    /* Inline styling for login page (or add to your styles.css) */
-    body {
-      background-color: #f0f8ff;
-      margin: 20px;
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-    #login-container {
-      background-color: #e6f2ff;
-      border: 1px solid #b3d1ff;
-      border-radius: 5px;
-      padding: 30px;
-      max-width: 400px;
-      margin: 50px auto;
-    }
-    #login-container h2 {
-      color: #003366;
-    }
-    #login-container p {
-      font-size: 1.1em;
-      color: #003366;
-    }
-    #login-container button {
-      background-color: #66b3ff;
-      color: #fff;
-      border: none;
-      border-radius: 3px;
-      padding: 10px 20px;
-      font-size: 1em;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    #login-container button:hover {
-      background-color: #3399ff;
-    }
-  </style>
 </head>
 <body>
   <div id="login-container">
     <h2>Welcome to Flight Logbook</h2>
     <p>Please sign in with your Google account to continue.</p>
-    <button id="sign-in-btn">Sign In with Google</button>
+    <div id="auth-container"></div>
   </div>
   
-  <!-- Firebase Auth Scripts -->
-  <script type="module">
-    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-    import { auth } from "./auth.js"; // Import our auth instance (this will set up the listener)
-
-    const provider = new GoogleAuthProvider();
-
-    document.getElementById("sign-in-btn").addEventListener("click", () => {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          console.log("Signed in as:", result.user.displayName);
-          // After successful sign-in, redirect to the main page.
-          window.location.href = "index.html";
-        })
-        .catch((error) => {
-          console.error("Sign in error:", error);
-          alert("Sign in failed. Please try again.");
-        });
-    });
-  </script>
+  <!-- Import auth.js (which initializes auth state listener) -->
+  <script type="module" src="auth.js"></script>
+  <!-- Firebase dependencies and Day.js scripts as needed -->
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/plugin/customParseFormat.js"></script>
 </body>
 </html>

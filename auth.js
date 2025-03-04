@@ -1,57 +1,53 @@
 // auth.js
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { auth } from "./firebase.js";
+import { 
+  onAuthStateChanged, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signOut 
+} from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
-// Initialize authentication and Google provider.
-const auth = getAuth();
-const provider = new GoogleAuthProvider();
-
-// Listen for auth state changes.
-onAuthStateChanged(auth, (user) => {
-    // If not signed in and not already on login.html, redirect to login page.
-    if (!user && !window.location.pathname.endsWith("login.html")) {
-      window.location.href = "login.html";
-    }
-  });
-
-// Function to sign in with Google using a popup.
-export function signIn() {
-  signInWithPopup(auth, provider)
-    .then((result) => {
-      console.log("Signed in as:", result.user.displayName);
-      // No auto redirect here—your app can react via onAuthStateChanged.
-    })
-    .catch((error) => {
-      console.error("Sign in error:", error);
-    });
-}
-
-// Function to sign out.
-export function signOutUser() {
-  signOut(auth)
-    .then(() => {
-      console.log("Signed out successfully.");
-    })
-    .catch((error) => {
-      console.error("Sign out error:", error);
-    });
-}
-
-// Listen for auth state changes and update the UI accordingly.
+// Listen for auth state changes and update the UI.
 onAuthStateChanged(auth, (user) => {
   const authContainer = document.getElementById("auth-container");
   if (!authContainer) return;
   
   if (user) {
-    // When signed in, show user's display name and a sign-out button.
+    // If user is signed in, show their display name and a sign-out button.
     authContainer.innerHTML = `
-      <p>Signed in as <strong>${user.displayName}</strong>
-      <button id="sign-out-btn">Sign Out</button></p>
+      <p>Signed in as <strong>${user.displayName}</strong></p>
+      <button id="sign-out-btn">Sign Out</button>
     `;
-    document.getElementById("sign-out-btn").addEventListener("click", signOutUser);
+    document.getElementById("sign-out-btn").addEventListener("click", () => {
+      signOut(auth)
+        .then(() => {
+          console.log("Signed out successfully.");
+          // Optionally redirect or update UI.
+        })
+        .catch((error) => {
+          console.error("Sign out error:", error);
+        });
+    });
   } else {
-    // When signed out, show a sign-in button.
-    authContainer.innerHTML = `<button id="sign-in-btn">Sign In with Google</button>`;
-    document.getElementById("sign-in-btn").addEventListener("click", signIn);
+    // If no user is signed in and we're on the login page, show sign in button.
+    if (window.location.pathname.endsWith("login.html")) {
+      authContainer.innerHTML = `<button id="sign-in-btn">Sign In with Google</button>`;
+      const provider = new GoogleAuthProvider();
+      document.getElementById("sign-in-btn").addEventListener("click", () => {
+        signInWithPopup(auth, provider)
+          .then((result) => {
+            console.log("Signed in as:", result.user.displayName);
+            window.location.href = "index.html";
+          })
+          .catch((error) => {
+            console.error("Sign in error:", error);
+            alert("Sign in failed. Please try again.");
+          });
+      });
+    } else {
+      // Not on login page? Redirect to login.
+      window.location.href = "login.html";
+    }
   }
 });
 
