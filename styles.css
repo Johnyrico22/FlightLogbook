@@ -9,6 +9,44 @@ h1 {
   color: #003366;  /* Dark blue heading */
   text-align: center;
 }
+/* Header Styling */
+#page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #e6f2ff;  /* Very light blue background */
+  border-bottom: 1px solid #b3d1ff;
+  padding: 10px 20px;
+  position: relative;
+}
+
+#page-header h1 {
+  margin: 0;
+  font-size: 1.8em;
+  color: #003366;
+}
+
+/* Authentication Container Styling */
+#auth-container {
+  font-size: 0.9em;
+  color: #003366;
+}
+
+#auth-container button {
+  background-color: #66b3ff;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease;
+}
+
+#auth-container button:hover {
+  background-color: #3399ff;
+}
+
 /* ---------------------------
    Mobile Card Layout Styling
 ---------------------------- */
