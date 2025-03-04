@@ -1,33 +1,46 @@
 // logbook.js
-import { db, calculateFlightTime, getFlightMinutes, minutesToTime } from "./firebase.js";
+import { db, calculateFlightTime } from "./firebase.js";
 import {
   ref,
   query,
   orderByChild,
+  equalTo,
   onValue
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Ensure required containers exist.
+  // Ensure the required containers exist.
   if (!document.getElementById("tabulator-table") || !document.getElementById("mobile-cards-container")) return;
 
+  const auth = getAuth();
+  
+  // Ensure the user is authenticated. If not, redirect to login.
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      loadEntries(user.uid);
+    }
+  });
+  
   // "Add New Entry" button
   const addEntryButton = document.getElementById("add-entry-btn");
   addEntryButton.addEventListener("click", () => {
     window.location.href = "entry.html?id=new";
   });
-
+  
   // "Import" button
   document.getElementById("import-btn").addEventListener("click", () => {
     window.location.href = "import.html";
   });
-
+  
   // Column selector UI (for desktop view)
   const colSelectorBtn = document.getElementById("column-selector-btn");
   const colSelectorPanel = document.getElementById("column-selector-panel");
   const applyColumnsBtn = document.getElementById("apply-columns-btn");
   
-  if(colSelectorBtn && colSelectorPanel && applyColumnsBtn){
+  if (colSelectorBtn && colSelectorPanel && applyColumnsBtn) {
     colSelectorBtn.addEventListener("click", () => {
       colSelectorPanel.style.display = colSelectorPanel.style.display === "none" ? "block" : "none";
     });
@@ -44,86 +57,12 @@ document.addEventListener("DOMContentLoaded", () => {
       colSelectorPanel.style.display = "none";
     });
   }
-
+  
   let tabulatorTable; // For desktop view
-  let entriesCache = []; // Global cache of all entries
+  let entriesCache = []; // Global cache of entries
   let currentViewMode = ""; // "mobile" or "desktop"
-
-  // Function to update the summary container with calculated totals.
-// Update the summary container with overall and last 12 months statistics.
-function updateSummary(entries) {
-    let totalMinutes = 0;
-    let singleMinutes = 0;
-    let dualMinutes = 0;
-    let totalMinutesLast12 = 0;
-    let singleMinutesLast12 = 0;
-    let dualMinutesLast12 = 0;
-    
-    // Use dayjs to compare dates.
-    const oneYearAgo = dayjs().subtract(12, 'month');
-    
-    entries.forEach(entry => {
-      // Assume entry.date is in "YYYY-MM-DD" format.
-      const entryDate = dayjs(entry.date, "YYYY-MM-DD", true);
-      const flightMins = getFlightMinutes(entry.departureTime, entry.arrivalTime);
-      totalMinutes += flightMins;
-      if (entry.flightType && entry.flightType.toLowerCase() === "single") {
-        singleMinutes += flightMins;
-      } else if (entry.flightType && entry.flightType.toLowerCase() === "dual") {
-        dualMinutes += flightMins;
-      }
-      if (entryDate.isAfter(oneYearAgo)) {
-        totalMinutesLast12 += flightMins;
-        if (entry.flightType && entry.flightType.toLowerCase() === "single") {
-          singleMinutesLast12 += flightMins;
-        } else if (entry.flightType && entry.flightType.toLowerCase() === "dual") {
-          dualMinutesLast12 += flightMins;
-        }
-      }
-    });
-    
-    // Convert minutes to a time string (assumes minutesToTime is imported from firebase.js)
-    const overallTotal = minutesToTime(totalMinutes);
-    const overallSingle = minutesToTime(singleMinutes);
-    const overallDual = minutesToTime(dualMinutes);
-    const last12Total = minutesToTime(totalMinutesLast12);
-    const last12Single = minutesToTime(singleMinutesLast12);
-    const last12Dual = minutesToTime(dualMinutesLast12);
-    
-    const summaryContainer = document.getElementById("summary-container");
-    if (summaryContainer) {
-      summaryContainer.innerHTML = `
-        <div class="summary-cards">
-          <div class="summary-card">
-            <p>Total Flight Time</p>
-            <h3>${overallTotal}</h3>
-          </div>
-          <div class="summary-card">
-            <p>Total Single Time</p>
-            <h3>${overallSingle}</h3>
-          </div>
-          <div class="summary-card">
-            <p>Total Dual Time</p>
-            <h3>${overallDual}</h3>
-          </div>
-          <div class="summary-card">
-            <p>Last 12 Months Flight Time</p>
-            <h3>${last12Total}</h3>
-          </div>
-          <div class="summary-card">
-            <p>Last 12 Months Single Time</p>
-            <h3>${last12Single}</h3>
-          </div>
-          <div class="summary-card">
-            <p>Last 12 Months Dual Time</p>
-            <h3>${last12Dual}</h3>
-          </div>
-        </div>
-      `;
-    }
-  }
-
-  // Function to render the view based on window width and filtered entries.
+  
+  // Render view (table or mobile cards) based on the screen width and provided entries.
   function renderView(entries) {
     const newViewMode = window.innerWidth < 800 ? "mobile" : "desktop";
     currentViewMode = newViewMode;
@@ -140,7 +79,7 @@ function updateSummary(entries) {
         const card = document.createElement("div");
         card.classList.add("card");
         const totalFlight = calculateFlightTime(entry.departureTime, entry.arrivalTime);
-        // Create title: "$date - flight from $departurePoint to $arrivalPoint"
+        // Title format: "$date - flight from $departurePoint to $arrivalPoint"
         const title = `${entry.date} - flight from ${entry.departurePoint} to ${entry.arrivalPoint}`;
         card.innerHTML = `
           <h3>${title}</h3>
@@ -165,6 +104,7 @@ function updateSummary(entries) {
       const tableContainer = document.getElementById("tabulator-table");
       if (tableContainer) tableContainer.style.display = "block";
       
+      // Map entries for Tabulator.
       const tableData = entries.map(entry => {
         const totalFlight = calculateFlightTime(entry.departureTime, entry.arrivalTime);
         return {
@@ -222,6 +162,7 @@ function updateSummary(entries) {
           { title: "Hobbs Finish", field: "hobbsFinish", sorter: "number" }
         ]
       });
+      
       tabulatorTable.on("tableBuilt", () => {
         tabulatorTable.redraw();
       });
@@ -233,9 +174,15 @@ function updateSummary(entries) {
     }
   }
   
+  // Load entries once from Firebase filtering by userId.
   function loadEntriesOnce() {
     const logbookRef = ref(db, "logbook");
-    const logbookQuery = query(logbookRef, orderByChild("date"));
+    // Filter by userId so only the current user's entries are retrieved.
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) return;
+    
+    const logbookQuery = query(logbookRef, orderByChild("userId"), equalTo(user.uid));
     onValue(logbookQuery, (snapshot) => {
       const data = snapshot.val();
       let entries = [];
@@ -245,9 +192,11 @@ function updateSummary(entries) {
       // Sort entries descending by date.
       entries.sort((a, b) => b.date.localeCompare(a.date));
       entriesCache = entries;
-      // Update the summary container with calculated totals.
+      
+      // Update summary (if you have a summary container, call updateSummary(entriesCache))
       updateSummary(entriesCache);
-      // Render the view (either mobile or desktop) with all entries.
+      
+      // Render the appropriate view.
       renderView(entriesCache);
     });
   }
@@ -272,8 +221,78 @@ function updateSummary(entries) {
         });
       });
       renderView(filteredEntries);
-      // Also update the summary based on filtered entries.
+      // Update summary with filtered entries.
       updateSummary(filteredEntries);
     });
+  }
+  
+  // Summary update function.
+  function updateSummary(entries) {
+    let totalMinutes = 0;
+    let singleMinutes = 0;
+    let dualMinutes = 0;
+    let totalMinutesLast12 = 0;
+    let singleMinutesLast12 = 0;
+    let dualMinutesLast12 = 0;
+    
+    const oneYearAgo = dayjs().subtract(12, 'month');
+    
+    entries.forEach(entry => {
+      const entryDate = dayjs(entry.date, "YYYY-MM-DD", true);
+      const flightMins = getFlightMinutes(entry.departureTime, entry.arrivalTime);
+      totalMinutes += flightMins;
+      if (entry.flightType && entry.flightType.toLowerCase() === "single") {
+        singleMinutes += flightMins;
+      } else if (entry.flightType && entry.flightType.toLowerCase() === "dual") {
+        dualMinutes += flightMins;
+      }
+      if (entryDate.isAfter(oneYearAgo)) {
+        totalMinutesLast12 += flightMins;
+        if (entry.flightType && entry.flightType.toLowerCase() === "single") {
+          singleMinutesLast12 += flightMins;
+        } else if (entry.flightType && entry.flightType.toLowerCase() === "dual") {
+          dualMinutesLast12 += flightMins;
+        }
+      }
+    });
+    
+    const overallTotal = minutesToTime(totalMinutes);
+    const overallSingle = minutesToTime(singleMinutes);
+    const overallDual = minutesToTime(dualMinutes);
+    const last12Total = minutesToTime(totalMinutesLast12);
+    const last12Single = minutesToTime(singleMinutesLast12);
+    const last12Dual = minutesToTime(dualMinutesLast12);
+    
+    const summaryContainer = document.getElementById("summary-container");
+    if (summaryContainer) {
+      summaryContainer.innerHTML = `
+        <div class="summary-cards">
+          <div class="summary-card">
+            <p>Total Flight Time</p>
+            <h3>${overallTotal}</h3>
+          </div>
+          <div class="summary-card">
+            <p>Total Single Time</p>
+            <h3>${overallSingle}</h3>
+          </div>
+          <div class="summary-card">
+            <p>Total Dual Time</p>
+            <h3>${overallDual}</h3>
+          </div>
+          <div class="summary-card">
+            <p>Last 12 Months Flight Time</p>
+            <h3>${last12Total}</h3>
+          </div>
+          <div class="summary-card">
+            <p>Last 12 Months Single Time</p>
+            <h3>${last12Single}</h3>
+          </div>
+          <div class="summary-card">
+            <p>Last 12 Months Dual Time</p>
+            <h3>${last12Dual}</h3>
+          </div>
+        </div>
+      `;
+    }
   }
 });
