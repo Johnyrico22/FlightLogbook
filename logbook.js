@@ -10,17 +10,17 @@ import {
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Ensure the required containers exist.
+  // Ensure required containers exist.
   if (!document.getElementById("tabulator-table") || !document.getElementById("mobile-cards-container")) return;
 
   const auth = getAuth();
   
-  // Ensure the user is authenticated. If not, redirect to login.
+  // Use auth state listener to ensure a user is signed in.
   onAuthStateChanged(auth, (user) => {
     if (!user) {
       window.location.href = "login.html";
     } else {
-      loadEntries(user.uid);
+      loadEntriesOnce();
     }
   });
   
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let entriesCache = []; // Global cache of entries
   let currentViewMode = ""; // "mobile" or "desktop"
   
-  // Render view (table or mobile cards) based on the screen width and provided entries.
+  // Render view (table or mobile cards) based on screen width.
   function renderView(entries) {
     const newViewMode = window.innerWidth < 800 ? "mobile" : "desktop";
     currentViewMode = newViewMode;
@@ -104,7 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const tableContainer = document.getElementById("tabulator-table");
       if (tableContainer) tableContainer.style.display = "block";
       
-      // Map entries for Tabulator.
       const tableData = entries.map(entry => {
         const totalFlight = calculateFlightTime(entry.departureTime, entry.arrivalTime);
         return {
@@ -174,10 +173,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  // Load entries once from Firebase filtering by userId.
+  // Load entries once from Firebase filtered by authenticated user's UID.
   function loadEntriesOnce() {
     const logbookRef = ref(db, "logbook");
-    // Filter by userId so only the current user's entries are retrieved.
     const auth = getAuth();
     const user = auth.currentUser;
     if (!user) return;
@@ -193,10 +191,10 @@ document.addEventListener("DOMContentLoaded", () => {
       entries.sort((a, b) => b.date.localeCompare(a.date));
       entriesCache = entries;
       
-      // Update summary (if you have a summary container, call updateSummary(entriesCache))
+      // Update summary.
       updateSummary(entriesCache);
       
-      // Render the appropriate view.
+      // Render view.
       renderView(entriesCache);
     });
   }
@@ -221,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
       renderView(filteredEntries);
-      // Update summary with filtered entries.
+      // Update summary based on filtered entries.
       updateSummary(filteredEntries);
     });
   }
