@@ -9,13 +9,12 @@
   <div id="login-container">
     <h2>Welcome to Flight Logbook</h2>
     <p>Please sign in with your Google account to continue.</p>
+    <!-- The auth container will be populated by auth.js -->
     <div id="auth-container"></div>
   </div>
   
-  <!-- Import auth.js (which initializes auth state listener) -->
+  <!-- Import auth.js which sets up the sign-in UI -->
   <script type="module" src="auth.js"></script>
-  <!-- Firebase dependencies and Day.js scripts as needed -->
-  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/dayjs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/plugin/customParseFormat.js"></script>
+
 </body>
 </html>

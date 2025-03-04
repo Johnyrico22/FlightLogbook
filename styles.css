@@ -290,3 +290,49 @@ form button {
   margin: 5px 0 0 0;
   font-size: 1.2em;
 }
+
+/* ---------------------------
+   Login Page Styling
+---------------------------- */
+#login-container {
+  background-color: #e6f2ff;  /* Very light blue container */
+  border: 1px solid #b3d1ff;
+  border-radius: 8px;
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  margin: 50px auto;  /* Center container horizontally */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#login-container h2 {
+  margin-top: 0;
+  color: #003366;
+  font-size: 1.8em;
+}
+
+#login-container p {
+  font-size: 1.1em;
+  color: #003366;
+  margin-bottom: 20px;
+}
+
+#auth-container {
+  margin-bottom: 20px;
+}
+
+#auth-container button {
+  background-color: #66b3ff;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#auth-container button:hover {
+  background-color: #3399ff;
+}
