@@ -8,9 +8,17 @@ import {
   push,
   set
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   if (!document.getElementById("log-entry-form")) return;
+  
+  const auth = getAuth();
+  // Redirect to login if user is not authenticated.
+  if (!auth.currentUser) {
+    window.location.href = "login.html";
+    return;
+  }
   
   const urlParams = new URLSearchParams(window.location.search);
   const id = urlParams.get("id");
@@ -70,13 +78,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  // Auto-calculate day and night hours
+  // Auto-calculate day and night hours.
   form.dayHours.addEventListener("change", () => {
     const totalMins = getFlightMinutes(form.departureTime.value, form.arrivalTime.value);
     const dayMins = timeToMinutes(form.dayHours.value);
     const nightMins = totalMins - dayMins;
     form.nightHours.value = minutesToTime(nightMins);
   });
+  
   form.nightHours.addEventListener("change", () => {
     const totalMins = getFlightMinutes(form.departureTime.value, form.arrivalTime.value);
     const nightMins = timeToMinutes(form.nightHours.value);
@@ -114,7 +123,9 @@ document.addEventListener("DOMContentLoaded", () => {
       dayHours: form.dayHours.value,
       nightHours: form.nightHours.value,
       tacoFinish: form.tacoFinish.value,
-      hobbsFinish: form.hobbsFinish.value
+      hobbsFinish: form.hobbsFinish.value,
+      // Include the authenticated user's UID.
+      userId: auth.currentUser ? auth.currentUser.uid : null
     };
     
     try {
