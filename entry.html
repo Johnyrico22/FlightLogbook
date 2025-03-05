@@ -12,64 +12,115 @@
 
   <h1>Log Entry</h1>
   <form id="log-entry-form">
-    <label>Date: 
-      <input type="date" name="date" required>
-    </label>
-    <label>Aircraft: 
-      <input type="text" name="aircraft" required>
-    </label>
-    <label>Registration: 
-      <input type="text" name="registration" required>
-    </label>
-    <label>Name: 
-      <input type="text" name="name" required>
-    </label>
-    <label>Designation: 
-      <input type="text" name="designation" required>
-    </label>
-    <label>Departure Point: 
-      <input type="text" name="departurePoint" required>
-    </label>
-    <label>Departure Time: 
-      <input type="time" name="departureTime" required>
-    </label>
-    <label>Arrival Point: 
-      <input type="text" name="arrivalPoint" required>
-    </label>
-    <label>Arrival Time: 
-      <input type="time" name="arrivalTime" required>
-    </label>
-    <label>Flight Type:
-      <input type="radio" name="flightType" value="single" checked> Single
-      <input type="radio" name="flightType" value="dual"> Dual
-    </label>
-    <!-- Instrument time split into hours and minutes -->
-    <label>Instrument:
-      <input type="number" id="instrumentH" name="instrumentH" placeholder="HH" min="0"> 
-      <input type="number" id="instrumentM" name="instrumentM" placeholder="MM" min="0" max="59">
-    </label>
-    <label>Take Offs:
-      <input type="number" name="takeOffs" value="1" min="0">
-    </label>
-    <label>Landings:
-      <input type="number" name="landings" value="1" min="0">
-    </label>
-    <!-- Day Hours split into separate hour and minute inputs -->
-    <label>Day Hours:
-      <input type="number" id="dayHoursH" name="dayHoursH" placeholder="HH" min="0">
-      <input type="number" id="dayHoursM" name="dayHoursM" placeholder="MM" min="0" max="59">
-    </label>
-    <!-- Night Hours split into separate hour and minute inputs -->
-    <label>Night Hours:
-      <input type="number" id="nightHoursH" name="nightHoursH" placeholder="HH" min="0">
-      <input type="number" id="nightHoursM" name="nightHoursM" placeholder="MM" min="0" max="59">
-    </label>
-    <label>Taco Finish:
-      <input type="number" name="tacoFinish" step="0.1">
-    </label>
-    <label>Hobbs Finish:
-      <input type="number" name="hobbsFinish" step="0.1">
-    </label>
+    <div class="form-group">
+      <label>Date:
+        <input type="date" name="date" required>
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Aircraft:
+        <input type="text" name="aircraft" required>
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Registration:
+        <input type="text" name="registration" required>
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Name:
+        <input type="text" name="name" required>
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Designation:
+        <input type="text" name="designation" required>
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Departure Point:
+        <input type="text" name="departurePoint" required>
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Departure Time:
+        <input type="time" name="departureTime" required>
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Arrival Point:
+        <input type="text" name="arrivalPoint" required>
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Arrival Time:
+        <input type="time" name="arrivalTime" required>
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Flight Type:</label>
+      <div class="radio-group">
+        <label>
+          <input type="radio" name="flightType" value="solo" checked>
+          Solo
+        </label>
+        <label>
+          <input type="radio" name="flightType" value="dual">
+          Dual
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Engine Type:</label>
+      <div class="radio-group">
+        <label>
+          <input type="radio" name="engineType" value="singleEngine" checked>
+          Single Engine
+        </label>
+        <label>
+          <input type="radio" name="engineType" value="multiEngine">
+          Multi Engine
+        </label>
+      </div>
+    </div>   
+    <div class="form-group">
+      <label>Take Offs:
+        <input type="number" name="takeOffs" value="1" min="0">
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Landings:
+        <input type="number" name="landings" value="1" min="0">
+      </label>
+    </div>
+    <div class="form-group time-entry">
+      <label>Day Hours:
+        <input type="number" id="dayHoursH" name="dayHoursH" placeholder="HH" min="0">
+        <input type="number" id="dayHoursM" name="dayHoursM" placeholder="MM" min="0" max="59">
+      </label>
+    </div>
+    <div class="form-group time-entry">
+      <label>Night Hours:
+        <input type="number" id="nightHoursH" name="nightHoursH" placeholder="HH" min="0">
+        <input type="number" id="nightHoursM" name="nightHoursM" placeholder="MM" min="0" max="59">
+      </label>
+    </div>
+    <div class="form-group time-entry">
+      <label>Instrument Hours:
+        <input type="number" id="instrumentH" name="instrumentH" placeholder="HH" min="0">
+        <input type="number" id="instrumentM" name="instrumentM" placeholder="MM" min="0" max="59">
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Taco Finish:
+        <input type="number" name="tacoFinish" step="0.1">
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Hobbs Finish:
+        <input type="number" name="hobbsFinish" step="0.1">
+      </label>
+    </div>
     
     <button type="submit">Save Entry</button>
   </form>

@@ -5,7 +5,11 @@ import { db } from "./firebase.js";
 import {
   ref,
   push,
-  set
+  set,
+  get,
+  query,
+  orderByChild,
+  equalTo
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
@@ -116,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         csvData = results.data;
         console.log("CSV parsed. Number of rows:", csvData.length);
         
+        // Updated required headers to include engineType.
         const requiredHeaders = [
           "date",
           "aircraft",
@@ -127,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
           "arrivalPoint",
           "arrivalTime",
           "flightType",
+          "engineType",      // New header
           "instrument",
           "takeOffs",
           "landings",
@@ -209,33 +215,75 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
+    // Query existing entries for this user so we can check for duplicates.
+    const userLogbookRef = query(ref(db, "logbook"), orderByChild("userId"), equalTo(currentUser.uid));
+    const snapshot = await get(userLogbookRef);
+    const existingData = snapshot.val();
+    let existingEntriesMap = {};
+    if (existingData) {
+      for (const id in existingData) {
+        const entry = existingData[id];
+        // Composite key: date|departurePoint|departureTime|arrivalPoint|arrivalTime
+        const key = `${entry.date}|${entry.departurePoint}|${entry.departureTime}|${entry.arrivalPoint}|${entry.arrivalTime}`;
+        existingEntriesMap[key] = id;
+      }
+    }
+    
     let importedCount = 0;
     for (const row of csvData) {
+      // Normalize and parse CSV values.
       row.date = parseDate(row.date);
       row.departureTime = parseTime(row.departureTime);
       row.arrivalTime = parseTime(row.arrivalTime);
       
+      // Calculate total flight time.
       const totalFlight = calculateFlightTime(row.departureTime, row.arrivalTime);
-      if (row.flightType.toLowerCase() === "single") {
+      
+      // Use "solo" instead of "single" and guard against missing flightType.
+      if (row.flightType && row.flightType.toLowerCase() === "solo") {
         row.single = totalFlight;
         row.dual = "";
-      } else if (row.flightType.toLowerCase() === "dual") {
+      } else if (row.flightType && row.flightType.toLowerCase() === "dual") {
         row.dual = totalFlight;
         row.single = "";
+      } else {
+        // If flightType is missing or unrecognized, default to solo.
+        row.single = totalFlight;
+        row.dual = "";
       }
       
-      // Add the authenticated user's UID to the row.
+      // Normalize engineType field.
+      if (row.engineType) {
+        const et = row.engineType.trim().toLowerCase();
+        if (et === "single" || et === "singleengine") {
+          row.engineType = "singleEngine";
+        } else if (et === "multi" || et === "multiengine") {
+          row.engineType = "multiEngine";
+        }
+      }
+      
+      // Add the authenticated user's UID.
       row.userId = currentUser.uid;
       
-      const newEntryRef = push(ref(db, "logbook"));
+      // Create a composite key for this row.
+      const compositeKey = `${row.date}|${row.departurePoint}|${row.departureTime}|${row.arrivalPoint}|${row.arrivalTime}`;
+      let entryRef;
+      if (existingEntriesMap[compositeKey]) {
+        // Overwrite the existing entry.
+        entryRef = ref(db, "logbook/" + existingEntriesMap[compositeKey]);
+      } else {
+        // Create a new entry.
+        entryRef = push(ref(db, "logbook"));
+      }
+      
       try {
-        await set(newEntryRef, row);
+        await set(entryRef, row);
         importedCount++;
       } catch (err) {
         console.error("Error importing row:", err);
       }
     }
-    alert(`${importedCount} new rows have been added.`);
+    alert(`${importedCount} new rows have been added or updated.`);
     window.location.href = "index.html";
   });
-});
+})

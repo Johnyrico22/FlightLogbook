@@ -6,7 +6,8 @@ import {
   update,
   remove,
   push,
-  set
+  set,
+  get
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
@@ -83,7 +84,23 @@ document.addEventListener("DOMContentLoaded", () => {
           if (data.flightType) {
             form.elements["flightType"].value = data.flightType;
           }
-          form.instrument.value = data.instrument || "";
+          if (data.engineType && form.elements["engineType"]) {
+            form.elements["engineType"].value = data.engineType;
+          }
+          if (data.instrument) {
+            const parts = data.instrument.match(/(\d+)\s*h\s*(\d+)\s*m/);
+            if (parts) {
+              form.querySelector("#instrumentH").value = parts[1];
+              form.querySelector("#instrumentM").value = parts[2];
+            } else {
+              form.querySelector("#instrumentH").value = "0";
+              form.querySelector("#instrumentM").value = "0";
+            }
+          } else {
+            form.querySelector("#instrumentH").value = "0";
+            form.querySelector("#instrumentM").value = "0";
+          }
+          
           form.takeOffs.value = data.takeOffs || 1;
           form.landings.value = data.landings || 1;
           // Parse dayHours from stored "Xh Ym" format.
@@ -170,6 +187,27 @@ document.addEventListener("DOMContentLoaded", () => {
     nightHoursH.addEventListener("change", updateDayHours);
     nightHoursM.addEventListener("change", updateDayHours);
     
+    // Auto-calculate flight time when departure and arrival times are entered.
+    const departureTimeInput = form.querySelector('[name="departureTime"]');
+    const arrivalTimeInput = form.querySelector('[name="arrivalTime"]');
+    
+    function updateFlightTime() {
+      if (departureTimeInput.value && arrivalTimeInput.value) {
+        const totalMins = getFlightMinutes(departureTimeInput.value, arrivalTimeInput.value);
+        dayHoursH.value = Math.floor(totalMins / 60);
+        dayHoursM.value = totalMins % 60;
+        // Optionally, reset night hours if you want them to default to zero.
+        nightHoursH.value = "0";
+        nightHoursM.value = "0";
+      }
+    }
+    
+    departureTimeInput.addEventListener("change", updateFlightTime);
+    arrivalTimeInput.addEventListener("change", updateFlightTime);
+    
+    // Setup autocomplete suggestions for aircraft, registration, departure point, arrival point, and name.
+    setupAutocomplete();
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const totalFlight = calculateFlightTime(form.departureTime.value, form.arrivalTime.value);
@@ -181,10 +219,14 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (flightType === "dual") {
         dual = totalFlight;
       }
+      // Retrieve the engine type value.
+      const engineType = form.elements["engineType"].value;
+      
       // Combine separate day hours inputs into a formatted string.
       const dayHoursFormatted = `${dayHoursH.value}h ${dayHoursM.value}m`;
       const nightHoursFormatted = `${nightHoursH.value}h ${nightHoursM.value}m`;
-      
+      const instrumentFormatted = `${form.querySelector("#instrumentH").value}h ${form.querySelector("#instrumentM").value}m`;
+
       const entryData = {
         date: form.date.value,
         aircraft: form.aircraft.value,
@@ -198,7 +240,8 @@ document.addEventListener("DOMContentLoaded", () => {
         flightType: flightType,
         single: single,
         dual: dual,
-        instrument: form.instrument.value,
+        engineType: engineType,
+        instrument: instrumentFormatted,
         takeOffs: form.takeOffs.value,
         landings: form.landings.value,
         dayHours: dayHoursFormatted,
@@ -221,6 +264,67 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Error saving entry: ", error);
         alert("Failed to save entry. Please try again.");
       }
+    });
+  }
+  
+  // Function to set up autocomplete using previous log entries.
+  function setupAutocomplete() {
+    const form = document.getElementById("log-entry-form");
+    if (!form) return;
+    
+    const logbookRef = ref(db, "logbook");
+    get(logbookRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const entries = snapshot.val();
+          const aircraftSet = new Set();
+          const registrationSet = new Set();
+          const departureSet = new Set();
+          const arrivalSet = new Set();
+          const nameSet = new Set();
+          
+          for (const key in entries) {
+            const entry = entries[key];
+            if (entry.aircraft) aircraftSet.add(entry.aircraft);
+            if (entry.registration) registrationSet.add(entry.registration);
+            if (entry.departurePoint) departureSet.add(entry.departurePoint);
+            if (entry.arrivalPoint) arrivalSet.add(entry.arrivalPoint);
+            if (entry.name) nameSet.add(entry.name);
+          }
+          
+          // Update or create datalists for each field.
+          updateDatalist("aircraft", "aircraft-datalist", aircraftSet);
+          updateDatalist("registration", "registration-datalist", registrationSet);
+          updateDatalist("departurePoint", "departure-datalist", departureSet);
+          updateDatalist("arrivalPoint", "arrival-datalist", arrivalSet);
+          updateDatalist("name", "name-datalist", nameSet);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching logbook data for autocomplete:", error);
+      });
+  }
+  
+  // Helper function to create or update a datalist for a given input field.
+  function updateDatalist(fieldName, datalistId, dataSet) {
+    const inputField = document.querySelector(`input[name="${fieldName}"]`);
+    if (!inputField) return;
+    let datalist = document.getElementById(datalistId);
+    if (!datalist) {
+      datalist = document.createElement("datalist");
+      datalist.id = datalistId;
+      // Attach the datalist to the input field.
+      inputField.setAttribute("list", datalistId);
+      // Append the datalist to the input field's parent element.
+      inputField.parentElement.appendChild(datalist);
+    }
+    // Clear any existing options.
+    datalist.innerHTML = "";
+    // Populate the datalist with new options.
+    dataSet.forEach((item) => {
+      const option = document.createElement("option");
+      option.value = item;
+      datalist.appendChild(option);
     });
   }
 });

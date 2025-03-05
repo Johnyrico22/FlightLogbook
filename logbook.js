@@ -8,6 +8,7 @@ import {
   onValue
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { updateSummaryCards } from "./summaryCards.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOMContentLoaded event fired");
@@ -40,7 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("import-btn").addEventListener("click", () => {
     window.location.href = "import.html";
   });
-  
+  // "stats" button 
+  document.getElementById("stats-btn").addEventListener("click", () => {
+    window.location.href = "reporting.html";
+  });
   // Column selector UI (for desktop view)
   const colSelectorBtn = document.getElementById("column-selector-btn");
   const colSelectorPanel = document.getElementById("column-selector-panel");
@@ -66,12 +70,12 @@ document.addEventListener("DOMContentLoaded", () => {
   
   let tabulatorTable; // For desktop view
   let entriesCache = []; // Global cache of entries
-  let currentViewMode = ""; // "mobile" or "desktop"
+  let currentViewMode = "desktop"; // "mobile" or "desktop"
   
   // Render view (table or mobile cards) based on screen width.
   function renderView(entries) {
     console.log("Rendering view with entries:", entries);
-    const newViewMode = window.innerWidth < 800 ? "mobile" : "desktop";
+    const newViewMode = window.innerWidth < 1100 ? "mobile" : "desktop";
     currentViewMode = newViewMode;
     
     if (newViewMode === "mobile") {
@@ -86,16 +90,23 @@ document.addEventListener("DOMContentLoaded", () => {
         const card = document.createElement("div");
         card.classList.add("card");
         const totalFlight = calculateFlightTime(entry.departureTime, entry.arrivalTime);
-        // Title format: "$date - flight from $departurePoint to $arrivalPoint"
-        const title = `${entry.date} - flight from ${entry.departurePoint} to ${entry.arrivalPoint}`;
+        // Build card with a title container and two columns underneath.
         card.innerHTML = `
-          <h3>${title}</h3>
-          <p><strong>Aircraft:</strong> ${entry.aircraft}</p>
-          <p><strong>Registration:</strong> ${entry.registration}</p>
-          <p><strong>Name:</strong> ${entry.name} (${entry.designation})</p>
-          <p><strong>Departure Time:</strong> ${entry.departureTime}</p>
-          <p><strong>Arrival Time:</strong> ${entry.arrivalTime}</p>
-          <p><strong>Total Flight Time:</strong> ${totalFlight}</p>
+          <div class="card-title-container">
+            <h3>${entry.date} - Flight from ${entry.departurePoint} to ${entry.arrivalPoint}</h3>
+          </div>
+          <div class="card-content">
+            <div class="card-column">
+              <p><strong>Aircraft:</strong> ${entry.aircraft}</p>
+              <p><strong>Registration:</strong> ${entry.registration}</p>
+              <p><strong>Name:</strong> ${entry.name} (${entry.designation})</p>
+            </div>
+            <div class="card-column">
+              <p><strong>Departure Time:</strong> ${entry.departureTime}</p>
+              <p><strong>Arrival Time:</strong> ${entry.arrivalTime}</p>
+              <p><strong>Total Flight Time:</strong> ${totalFlight}</p>
+            </div>
+          </div>
         `;
         card.style.whiteSpace = "normal";
         card.addEventListener("click", () => {
@@ -104,6 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
         mobileContainer.appendChild(card);
       });
       mobileContainer.style.display = "block";
+
     } else {
       // Desktop/table view.
       const mobileContainer = document.getElementById("mobile-cards-container");
@@ -125,8 +137,11 @@ document.addEventListener("DOMContentLoaded", () => {
           arrivalPoint: entry.arrivalPoint,
           arrivalTime: entry.arrivalTime,
           totalFlightTime: totalFlight,
-          single: (entry.flightType === "single") ? totalFlight : "",
-          dual: (entry.flightType === "dual") ? totalFlight : "",
+          solo: (entry.flightType && entry.flightType.toLowerCase() === "solo") ? totalFlight : "",
+          dual: (entry.flightType && entry.flightType.toLowerCase() === "dual") ? totalFlight : "",          
+          singleEngine: (entry.engineType === "singleEngine") ? totalFlight : "",
+          multiEngine: (entry.engineType === "multiEngine") ? totalFlight : "",
+          engineType: entry.engineType || "",
           instrument: entry.instrument || "",
           takeOffs: entry.takeOffs || 1,
           landings: entry.landings || 1,
@@ -144,8 +159,11 @@ document.addEventListener("DOMContentLoaded", () => {
       tabulatorTable = new Tabulator("#tabulator-table", {
         data: tableData,
         layout: "fitColumns",
-        movableColumns: true,
-        responsiveLayout: "collapse",
+        columnDefaults: {
+          resizable: false, // disable column resizing for all columns
+        },
+        movableColumns: false,
+        responsiveLayout: "hide",
         columns: [
           { title: "Date", field: "date", sorter: "string" },
           { title: "Aircraft", field: "aircraft", sorter: "string" },
@@ -157,17 +175,18 @@ document.addEventListener("DOMContentLoaded", () => {
           { title: "Arrival Point", field: "arrivalPoint", sorter: "string" },
           { title: "Arrival Time", field: "arrivalTime", sorter: "string" },
           { title: "Total Flight Time", field: "totalFlightTime", sorter: "string" },
-          { title: "Single", field: "single", sorter: "string" },
+          { title: "Single Engine", field: "singleEngine", sorter: "string" },
+          { title: "Multi Engine", field: "multiEngine", sorter: "string" },
+          { title: "Solo", field: "solo", sorter: "string" },
           { title: "Dual", field: "dual", sorter: "string" },
           { title: "Instrument", field: "instrument", sorter: "string" },
-          { title: "Take Offs", field: "takeOffs", sorter: "number" },
-          { title: "Landings", field: "landings", sorter: "number" },
           { title: "Day Hours", field: "dayHours", sorter: "string" },
           { title: "Night Hours", field: "nightHours", sorter: "string" },
-          { title: "Taco Finish", field: "tacoFinish", sorter: "number" },
-          { title: "Hobbs Finish", field: "hobbsFinish", sorter: "number" }
+          { title: "Take Offs", field: "takeOffs", sorter: "number" },
+          { title: "Landings", field: "landings", sorter: "number" },
         ]
       });
+      
       
       tabulatorTable.on("tableBuilt", () => {
         tabulatorTable.redraw();
@@ -177,12 +196,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const rowData = row.getData();
         window.location.href = `entry.html?id=${rowData.id}`;
       });
+      
     }
   }
   
-  // Load entries once from Firebase filtered by authenticated user's UID.
   function loadEntriesOnce() {
-    console.log("loadEntriesOnce called");
     const logbookRef = ref(db, "logbook");
     const auth = getAuth();
     const user = auth.currentUser;
@@ -191,12 +209,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     
-    console.log("User ID:", user.uid); // Add this line
     const logbookQuery = query(logbookRef, orderByChild("userId"), equalTo(user.uid));
-    console.log("Query created:", logbookQuery); // Add this line
     onValue(logbookQuery, (snapshot) => {
       const data = snapshot.val();
-      console.log("Fetched data:", data);
       if (!data) {
         console.log("No data found for the user.");
         return;
@@ -209,13 +224,14 @@ document.addEventListener("DOMContentLoaded", () => {
       entries.sort((a, b) => b.date.localeCompare(a.date));
       entriesCache = entries;
       
-      // Update summary.
-      updateSummary(entriesCache);
-      
-      // Render view.
+      // Render view and update summary.
       renderView(entriesCache);
+      const summaryContainer = document.getElementById("summary-container");
+      updateSummaryCards(entriesCache, summaryContainer, currentViewMode, false, false);
+      
+
     }, (error) => {
-      console.error("Error fetching data:", error); // Add this line
+      console.error("Error fetching data:", error);
     });
   }
   
@@ -223,8 +239,13 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("resize", () => {
     if (entriesCache.length > 0) {
       renderView(entriesCache);
+      const summaryContainer = document.getElementById("summary-container");
+      updateSummaryCards(entriesCache, summaryContainer, currentViewMode, false, false);
+      
+
     }
   });
+  
   
   // Filter functionality.
   const filterInput = document.getElementById("filter-input");
@@ -241,74 +262,5 @@ document.addEventListener("DOMContentLoaded", () => {
       updateSummary(filteredEntries);
     });
   }
-  
-  // Summary update function.
-  function updateSummary(entries) {
-    let totalMinutes = 0;
-    let singleMinutes = 0;
-    let dualMinutes = 0;
-    let totalMinutesLast12 = 0;
-    let singleMinutesLast12 = 0;
-    let dualMinutesLast12 = 0;
-    
-    const oneYearAgo = dayjs().subtract(12, 'month');
-    
-    entries.forEach(entry => {
-      const entryDate = dayjs(entry.date, "YYYY-MM-DD", true);
-      const flightMins = getFlightMinutes(entry.departureTime, entry.arrivalTime);
-      totalMinutes += flightMins;
-      if (entry.flightType && entry.flightType.toLowerCase() === "single") {
-        singleMinutes += flightMins;
-      } else if (entry.flightType && entry.flightType.toLowerCase() === "dual") {
-        dualMinutes += flightMins;
-      }
-      if (entryDate.isAfter(oneYearAgo)) {
-        totalMinutesLast12 += flightMins;
-        if (entry.flightType && entry.flightType.toLowerCase() === "single") {
-          singleMinutesLast12 += flightMins;
-        } else if (entry.flightType && entry.flightType.toLowerCase() === "dual") {
-          dualMinutesLast12 += flightMins;
-        }
-      }
-    });
-    
-    const overallTotal = minutesToTime(totalMinutes);
-    const overallSingle = minutesToTime(singleMinutes);
-    const overallDual = minutesToTime(dualMinutes);
-    const last12Total = minutesToTime(totalMinutesLast12);
-    const last12Single = minutesToTime(singleMinutesLast12);
-    const last12Dual = minutesToTime(dualMinutesLast12);
-    
-    const summaryContainer = document.getElementById("summary-container");
-    if (summaryContainer) {
-      summaryContainer.innerHTML = `
-        <div class="summary-cards">
-          <div class="summary-card">
-            <p>Total Flight Time</p>
-            <h3>${overallTotal}</h3>
-          </div>
-          <div class="summary-card">
-            <p>Total Single Time</p>
-            <h3>${overallSingle}</h3>
-          </div>
-          <div class="summary-card">
-            <p>Total Dual Time</p>
-            <h3>${overallDual}</h3>
-          </div>
-          <div class="summary-card">
-            <p>Last 12 Months Flight Time</p>
-            <h3>${last12Total}</h3>
-          </div>
-          <div class="summary-card">
-            <p>Last 12 Months Single Time</p>
-            <h3>${last12Single}</h3>
-          </div>
-          <div class="summary-card">
-            <p>Last 12 Months Dual Time</p>
-            <h3>${last12Dual}</h3>
-          </div>
-        </div>
-      `;
-    }
-  }
+
 });

@@ -1,10 +1,16 @@
 /* Overall Page Styling */
 body {
   font-family: Arial, sans-serif;
-  background-color: #f0f8ff;  /* Light, airy blue background */
-  margin: 20px;
+  background-color: #f6f8fa;  /* Light, airy blue background */
+  margin: 0; /* Removed global margin */
 }
 
+/* New container for content (excluding header) */
+.container {
+  margin-top: 10px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
 h1 {
   color: #003366;  /* Dark blue heading */
   text-align: center;
@@ -14,7 +20,7 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #e6f2ff;  /* Very light blue background */
+  background-color: #145ead;
   border-bottom: 1px solid #b3d1ff;
   padding: 10px 20px;
   position: relative;
@@ -23,24 +29,25 @@ h1 {
 #page-header h1 {
   margin: 0;
   font-size: 1.8em;
-  color: #003366;
+  color: #ffffff;
 }
 
 /* Authentication Container Styling */
 #auth-container {
-  font-size: 0.9em;
-  color: #003366;
+  font-size: 0.75em;
+  color: #ffffff;
 }
 
 #auth-container button {
-  background-color: #66b3ff;
+  background-color: #145ead;
   color: #fff;
   border: none;
   border-radius: 3px;
-  padding: 5px 10px;
+  padding: 3px 10px;
   cursor: pointer;
-  font-size: 0.9em;
+  font-size: 0.75em;
   transition: background-color 0.3s ease;
+  margin-left: 10px;
 }
 
 #auth-container button:hover {
@@ -51,7 +58,7 @@ h1 {
    Mobile Card Layout Styling
 ---------------------------- */
 
-@media (max-width: 800px) {
+@media (max-width: 1100px) {
   /* Hide table view container */
   #tabulator-table {
     display: none;
@@ -76,7 +83,7 @@ h1 {
   .card h3 {
     margin-top: 0;
     color: #003366;
-    font-size: 1.1em;
+    font-size: 1em;
   }
   
   .card p {
@@ -86,6 +93,25 @@ h1 {
     white-space: normal;
     word-wrap: break-word;
   }
+  /* Title container for mobile card */
+.card-title-container {
+  border-bottom: 1px solid #b3d1ff;
+  padding: 0px;
+  margin-bottom: 10px;
+}
+
+/* Content area for mobile card */
+.card-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Two columns inside card content */
+.card-column {
+  flex: 1;
+  min-width: 45%;
+}
 }
 
 /* Controls Container Styling */
@@ -93,8 +119,8 @@ h1 {
   background-color: #e6f2ff;  /* Very light blue background */
   border: 1px solid #b3d1ff;
   border-radius: 5px;
-  padding: 15px;
-  margin-bottom: 20px;
+  padding: 10px;
+  margin-bottom: 10px;
   text-align: center;
 }
 
@@ -143,14 +169,13 @@ h1 {
 }
 
 #tabulator-table .tabulator-header {
-  background-color: #f0faff !important; /* Very light blue */
   border-bottom: 1px solid #d0eaff !important;
   font-size: 0.75em;
 }
 
 /* Override default Tabulator header background color */
 #tabulator-table .tabulator-col {
-  background-color: #e6f2ff !important; /* Light blue */
+  background-color: #3f76b1 !important;
 }
 
 /* Force header title styling */
@@ -159,17 +184,18 @@ h1 {
   word-break: break-word !important;
   text-align: center !important;
   padding: 5px !important;
-  color: #003366 !important;
+  color: #ffffff !important;
+  font-weight: 500;
 }
 
 /* Row styling with alternating colors */
 #tabulator-table .tabulator-row {
-  border-bottom: 1px solid #e6f7ff;
+  border-bottom: 0px solid #e6f7ff;
   background-color: #ffffff;
 }
 
 #tabulator-table .tabulator-row:nth-child(even) {
-  background-color: #f7fbff; /* Light blue tint for alternate rows */
+  background-color: #e6f2ff; /* Light blue tint for alternate rows */
 }
 
 /* Cell styling */
@@ -257,11 +283,31 @@ form button {
   background-color: #e6f2ff;  /* Very light blue background */
   border: 1px solid #b3d1ff;
   border-radius: 5px;
-  padding: 15px;
-  margin-bottom: 20px;
+  padding: 10px;
+  margin-bottom: 10px;
   text-align: center;
   color: #003366;
 }
+.summary-more {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 1em;
+  color: #003366;
+  font-weight: bold;
+}
+.summary-more p {
+  margin: 0;
+}
+.summary-section {
+  margin-bottom: 20px;
+}
+
+.summary-section h3 {
+  text-align: center;
+  color: #003366;
+  margin-bottom: 10px;
+}
+
 
 /* Flex container for summary cards */
 .summary-cards {
@@ -288,7 +334,11 @@ form button {
 
 .summary-card h3 {
   margin: 5px 0 0 0;
-  font-size: 1.2em;
+  font-size: 1em;
+}
+.summary-card h4 {
+  margin: 5px 0 0 0;
+  font-size: 1em;
 }
 
 /* ---------------------------
@@ -335,4 +385,45 @@ form button {
 
 #auth-container button:hover {
   background-color: #3399ff;
+}
+
+/* Custom Form Group Spacing */
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* RADIO GROUP STYLING */
+.radio-group {
+  display: flex;
+  gap: 0px;
+  align-items: left;
+  margin-top: 5px;
+  padding: 0px;
+}
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* TIME ENTRY STYLING FOR DAY AND NIGHT HOURS */
+.time-entry {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+.time-entry label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.time-entry label input {
+  width: auto;
+  padding: 8px;
+  box-sizing: border-box;
 }
