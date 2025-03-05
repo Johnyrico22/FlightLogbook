@@ -1,4 +1,3 @@
-// entry.js
 import { db, calculateFlightTime, getFlightMinutes, timeToMinutes, minutesToTime } from "./firebase.js";
 import {
   ref,
@@ -55,13 +54,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   function setupForm() {
-    if (!document.getElementById("log-entry-form")) return;
+    const form = document.getElementById("log-entry-form");
+    if (!form) return;
     
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get("id");
-    const form = document.getElementById("log-entry-form");
+    let mode = (id && id !== "new") ? "view" : "edit";
     
-    // Grab separate day and night fields (ensure your HTML has these IDs)
     const dayHoursH = form.querySelector("#dayHoursH");
     const dayHoursM = form.querySelector("#dayHoursM");
     const nightHoursH = form.querySelector("#nightHoursH");
@@ -100,10 +99,8 @@ document.addEventListener("DOMContentLoaded", () => {
             form.querySelector("#instrumentH").value = "0";
             form.querySelector("#instrumentM").value = "0";
           }
-          
           form.takeOffs.value = data.takeOffs || 1;
           form.landings.value = data.landings || 1;
-          // Parse dayHours from stored "Xh Ym" format.
           if (data.dayHours) {
             const parts = data.dayHours.match(/(\d+)\s*h\s*(\d+)\s*m/);
             if (parts) {
@@ -114,12 +111,10 @@ document.addEventListener("DOMContentLoaded", () => {
               dayHoursM.value = "0";
             }
           } else {
-            // Default: use total flight time.
             const totalMins = getFlightMinutes(form.departureTime.value, form.arrivalTime.value);
             dayHoursH.value = Math.floor(totalMins / 60);
             dayHoursM.value = totalMins % 60;
           }
-          // Parse nightHours from stored "Xh Ym" format.
           if (data.nightHours) {
             const parts = data.nightHours.match(/(\d+)\s*h\s*(\d+)\s*m/);
             if (parts) {
@@ -135,6 +130,11 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           form.tacoFinish.value = data.tacoFinish || "";
           form.hobbsFinish.value = data.hobbsFinish || "";
+          form.notes.value = data.notes || "";
+          
+          if (mode === "view") {
+            setViewMode();
+          }
         }
       }, { onlyOnce: true });
       
@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const confirmed = confirm("Are you sure you want to delete this entry?");
           if (confirmed) {
             try {
-              await remove(entryRef);
+              await remove(ref(db, "logbook/" + id));
               alert("Entry deleted.");
               window.location.href = "index.html";
             } catch (error) {
@@ -161,6 +161,68 @@ document.addEventListener("DOMContentLoaded", () => {
               alert("Failed to delete entry.");
             }
           }
+        });
+      }
+    }
+    
+    function setViewMode() {
+      const elements = form.querySelectorAll("input, select, textarea");
+      elements.forEach(el => { el.disabled = true; });
+      const submitBtn = form.querySelector("button[type='submit']");
+      if (submitBtn) { submitBtn.style.display = "none"; }
+      if (!document.getElementById("edit-btn")) {
+        const editButton = document.createElement("button");
+        editButton.id = "edit-btn";
+        editButton.type = "button";
+        editButton.textContent = "Edit Entry";
+        const deleteBtn = document.getElementById("delete-btn");
+        if (deleteBtn) {
+          deleteBtn.parentElement.insertBefore(editButton, deleteBtn);
+        } else {
+          form.appendChild(editButton);
+        }
+        editButton.addEventListener("click", () => {
+          elements.forEach(el => { el.disabled = false; });
+          if (submitBtn) { submitBtn.style.display = "block"; }
+          editButton.remove();
+        });
+      }
+    }
+    
+    // Function to set the form in view mode: disable all inputs and hide the submit button.
+    function setViewMode() {
+      // Disable all inputs and selects.
+      const elements = form.querySelectorAll("input, select, textarea");
+      elements.forEach(el => {
+        el.disabled = true;
+      });
+      // Hide the submit button.
+      const submitBtn = form.querySelector("button[type='submit']");
+      if (submitBtn) {
+        submitBtn.style.display = "none";
+      }
+      // Add an "Edit Entry" button above the delete button if it doesn't already exist.
+      if (!document.getElementById("edit-btn")) {
+        const editButton = document.createElement("button");
+        editButton.id = "edit-btn";
+        editButton.type = "button";
+        editButton.textContent = "Edit Entry";
+        // Insert edit button before the delete button.
+        const deleteBtn = document.getElementById("delete-btn");
+        if (deleteBtn) {
+          deleteBtn.parentElement.insertBefore(editButton, deleteBtn);
+        } else {
+          form.appendChild(editButton);
+        }
+        // When clicked, switch to edit mode.
+        editButton.addEventListener("click", () => {
+          elements.forEach(el => {
+            el.disabled = false;
+          });
+          if (submitBtn) {
+            submitBtn.style.display = "block";
+          }
+          editButton.remove();
         });
       }
     }
@@ -214,40 +276,48 @@ document.addEventListener("DOMContentLoaded", () => {
       const flightType = form.elements["flightType"].value;
       let single = "";
       let dual = "";
-      if (flightType === "single") {
-        single = totalFlight;
-      } else if (flightType === "dual") {
-        dual = totalFlight;
-      }
-      // Retrieve the engine type value.
+      if (flightType === "single") { single = totalFlight; }
+      else if (flightType === "dual") { dual = totalFlight; }
       const engineType = form.elements["engineType"].value;
-      
-      // Combine separate day hours inputs into a formatted string.
       const dayHoursFormatted = `${dayHoursH.value}h ${dayHoursM.value}m`;
       const nightHoursFormatted = `${nightHoursH.value}h ${nightHoursM.value}m`;
       const instrumentFormatted = `${form.querySelector("#instrumentH").value}h ${form.querySelector("#instrumentM").value}m`;
-
+      
+      // Sanitize text fields using DOMPurify
+      const sanitizedAircraft = DOMPurify.sanitize(form.aircraft.value);
+      const sanitizedRegistration = DOMPurify.sanitize(form.registration.value);
+      const sanitizedName = DOMPurify.sanitize(form.name.value);
+      const sanitizedDesignation = DOMPurify.sanitize(form.designation.value);
+      const sanitizedDeparturePoint = DOMPurify.sanitize(form.departurePoint.value);
+      const sanitizedArrivalPoint = DOMPurify.sanitize(form.arrivalPoint.value);
+      const sanitizedFlightType = DOMPurify.sanitize(flightType);
+      const sanitizedEngineType = DOMPurify.sanitize(engineType);
+      const sanitizedTacoFinish = DOMPurify.sanitize(form.tacoFinish.value);
+      const sanitizedHobbsFinish = DOMPurify.sanitize(form.hobbsFinish.value);
+      const sanitizedNotes = DOMPurify.sanitize(form.notes.value);
+      
       const entryData = {
         date: form.date.value,
-        aircraft: form.aircraft.value,
-        registration: form.registration.value,
-        name: form.name.value,
-        designation: form.designation.value,
-        departurePoint: form.departurePoint.value,
+        aircraft: sanitizedAircraft,
+        registration: sanitizedRegistration,
+        name: sanitizedName,
+        designation: sanitizedDesignation,
+        departurePoint: sanitizedDeparturePoint,
         departureTime: form.departureTime.value,
-        arrivalPoint: form.arrivalPoint.value,
+        arrivalPoint: sanitizedArrivalPoint,
         arrivalTime: form.arrivalTime.value,
-        flightType: flightType,
+        flightType: sanitizedFlightType,
         single: single,
         dual: dual,
-        engineType: engineType,
-        instrument: instrumentFormatted,
+        engineType: sanitizedEngineType,
+        instrument: DOMPurify.sanitize(instrumentFormatted),
         takeOffs: form.takeOffs.value,
         landings: form.landings.value,
         dayHours: dayHoursFormatted,
         nightHours: nightHoursFormatted,
-        tacoFinish: form.tacoFinish.value,
-        hobbsFinish: form.hobbsFinish.value,
+        tacoFinish: sanitizedTacoFinish,
+        hobbsFinish: sanitizedHobbsFinish,
+        notes: sanitizedNotes,
         userId: auth.currentUser ? auth.currentUser.uid : null
       };
       
