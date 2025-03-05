@@ -1,4 +1,4 @@
-const aerodromeList = [
+export const aerodromeList = [
     "ABERDEEN DYCE - EGPD",
     "ABERPORTH - EGUC",
     "ABINGDON - EGUD",
