@@ -15,6 +15,9 @@ h1 {
   color: #003366;  /* Dark blue heading */
   text-align: center;
 }
+h3 {
+  color: #003366;
+}
 /* Header Styling */
 #page-header {
   display: flex;
@@ -225,17 +228,31 @@ form {
 form label {
   display: block;
   margin: 10px 0;
+  font-size: 0.9em;
+  color: #353535;
+  margin-bottom: 3px;
 }
 
 form input {
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
+  border-radius: 3px;
+  border-width: 1px;
+  border-color: #aaaaaa;
+  margin-top: 3px;
 }
 
 form button {
   padding: 10px 20px;
   margin-top: 20px;
+  display: block;
+  width: 100%;
+}
+
+form select {
+  padding: 10px 10px;
+  margin-top: 5px;
   display: block;
   width: 100%;
 }
