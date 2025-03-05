@@ -7,6 +7,48 @@
   <!-- Tabulator CSS -->
   <link href="https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator.min.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Controls container layout */
+    #controls-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    /* Extra controls that will be hidden on mobile */
+    #extra-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Hamburger button styling */
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: #fff;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    /* Mobile adjustments: hide extra controls and show hamburger */
+    @media (max-width: 600px) {
+      #extra-controls {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+      }
+      .hamburger {
+        display: block;
+      }
+    }
+  </style>
 </head>
 <body>
   <!-- Header with authentication area -->
@@ -16,61 +58,105 @@
   </header>
   <!-- New container for the rest of the content -->
   <div class="container">
-    <div id="summary-container"> </div>
-  <!-- Controls Container -->
-  <div id="controls-container">
-    <button id="add-entry-btn">Add New Entry</button>
-    <button id="column-selector-btn">Select Columns</button>
-    <button id="import-btn">Import Flight Data</button>
-    <button id="export-btn">Export Flight Data</button>
-    <button id="stats-btn">Stats</button>
-    
-    <!-- Column Selector Panel -->
-    <div id="column-selector-panel">
-      <label><input type="checkbox" data-field="date" checked> Date</label>
-      <label><input type="checkbox" data-field="aircraft" checked> Aircraft</label>
-      <label><input type="checkbox" data-field="registration" checked> Registration</label>
-      <label><input type="checkbox" data-field="name" checked> Name</label>
-      <label><input type="checkbox" data-field="designation" checked> Designation</label>
-      <label><input type="checkbox" data-field="departurePoint" checked> Departure Point</label>
-      <label><input type="checkbox" data-field="departureTime" checked> Departure Time</label>
-      <label><input type="checkbox" data-field="arrivalPoint" checked> Arrival Point</label>
-      <label><input type="checkbox" data-field="arrivalTime" checked> Arrival Time</label>
-      <label><input type="checkbox" data-field="totalFlightTime" checked> Total Flight Time</label>
-      <label><input type="checkbox" data-field="single" checked> Single</label>
-      <label><input type="checkbox" data-field="dual" checked> Dual</label>
-      <label><input type="checkbox" data-field="instrument" checked> Instrument</label>
-      <label><input type="checkbox" data-field="takeOffs" checked> Take Offs</label>
-      <label><input type="checkbox" data-field="landings" checked> Landings</label>
-      <label><input type="checkbox" data-field="dayHours" checked> Day Hours</label>
-      <label><input type="checkbox" data-field="nightHours" checked> Night Hours</label>
-      <label><input type="checkbox" data-field="tacoFinish" checked> Taco Finish</label>
-      <label><input type="checkbox" data-field="hobbsFinish" checked> Hobbs Finish</label>
-      <br>
-      <button id="apply-columns-btn">Apply</button>
+    <div id="summary-container"></div>
+    <!-- Controls Container -->
+    <div id="controls-container">
+      <!-- Always visible button -->
+      <button id="add-entry-btn">Add New Entry</button>
+      
+      <!-- Extra controls that will be toggled on mobile -->
+      <div id="extra-controls">
+        <button id="column-selector-btn">Select Columns</button>
+        <button id="import-btn">Import Flight Data</button>
+        <button id="export-btn">Export Flight Data</button>
+        <button id="stats-btn">Stats</button>
+        <!-- Column Selector Panel -->
+        <div id="column-selector-panel">
+          <label><input type="checkbox" data-field="date" checked> Date</label>
+          <label><input type="checkbox" data-field="aircraft" checked> Aircraft</label>
+          <label><input type="checkbox" data-field="registration" checked> Registration</label>
+          <label><input type="checkbox" data-field="name" checked> Name</label>
+          <label><input type="checkbox" data-field="designation" checked> Designation</label>
+          <label><input type="checkbox" data-field="departurePoint" checked> Departure Point</label>
+          <label><input type="checkbox" data-field="departureTime" checked> Departure Time</label>
+          <label><input type="checkbox" data-field="arrivalPoint" checked> Arrival Point</label>
+          <label><input type="checkbox" data-field="arrivalTime" checked> Arrival Time</label>
+          <label><input type="checkbox" data-field="totalFlightTime" checked> Total Flight Time</label>
+          <label><input type="checkbox" data-field="single" checked> Single</label>
+          <label><input type="checkbox" data-field="dual" checked> Dual</label>
+          <label><input type="checkbox" data-field="instrument" checked> Instrument</label>
+          <label><input type="checkbox" data-field="takeOffs" checked> Take Offs</label>
+          <label><input type="checkbox" data-field="landings" checked> Landings</label>
+          <label><input type="checkbox" data-field="dayHours" checked> Day Hours</label>
+          <label><input type="checkbox" data-field="nightHours" checked> Night Hours</label>
+          <label><input type="checkbox" data-field="tacoFinish" checked> Taco Finish</label>
+          <label><input type="checkbox" data-field="hobbsFinish" checked> Hobbs Finish</label>
+          <br>
+          <button id="apply-columns-btn">Apply</button>
+        </div>
+      </div>
+      
+      <!-- Hamburger button shown only on mobile -->
+      <button id="hamburger-btn" class="hamburger">&#9776;</button>
     </div>
-  </div>
 
-   <!-- Filter Container -->
-   <div id="filter-container">
-    <input type="text" id="filter-input" placeholder="Type to filter logbook entries..." />
-  </div>
+    <!-- Filter Container -->
+    <div id="filter-container">
+      <input type="text" id="filter-input" placeholder="Type to filter logbook entries..." />
+    </div>
 
-  <!-- Container for mobile cards -->
-  <div id="mobile-cards-container" style="display:none;"></div>
-  
-  <!-- Container for table view -->
-  <div id="tabulator-table"></div>
-  
-  <!-- Tabulator JS -->
-  <script src="https://unpkg.com/tabulator-tables@5.4.3/dist/js/tabulator.min.js"></script>
-  <!-- Your application code -->
-  <script type="module" src="app.js"></script>
-   <!-- Authentication Code -->
-   <script type="module" src="auth.js"></script>
-  <!-- Day.js and Plugin -->
-  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/dayjs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/plugin/customParseFormat.js"></script>
-</div>
+    <!-- Container for mobile cards -->
+    <div id="mobile-cards-container" style="display:none;"></div>
+    
+    <!-- Container for table view -->
+    <div id="tabulator-table"></div>
+    
+    <!-- Tabulator JS -->
+    <script src="https://unpkg.com/tabulator-tables@5.4.3/dist/js/tabulator.min.js"></script>
+    <!-- Your application code -->
+    <script type="module" src="app.js"></script>
+    <!-- Authentication Code -->
+    <script type="module" src="auth.js"></script>
+    <!-- Day.js and Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/plugin/customParseFormat.js"></script>
+    <script>
+      // Function to toggle extra controls when the hamburger button is clicked (for mobile)
+      function toggleExtraControls() {
+        const extraControls = document.getElementById("extra-controls");
+        if (extraControls.style.display === "flex" || extraControls.style.display === "block") {
+          extraControls.style.display = "none";
+        } else {
+          extraControls.style.display = "flex";
+          extraControls.style.flexDirection = "column";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const hamburgerBtn = document.getElementById("hamburger-btn");
+        hamburgerBtn.addEventListener("click", toggleExtraControls);
+
+        // Window resize listener to automatically adjust controls display.
+        function adjustControlsDisplay() {
+          const extraControls = document.getElementById("extra-controls");
+          const hamburgerBtn = document.getElementById("hamburger-btn");
+          if (window.innerWidth > 600) {
+            // Show all extra controls and hide hamburger when screen is wide.
+            extraControls.style.display = "flex";
+            extraControls.style.flexDirection = "row";
+            hamburgerBtn.style.display = "none";
+          } else {
+            // Hide extra controls and show hamburger on mobile.
+            extraControls.style.display = "none";
+            hamburgerBtn.style.display = "block";
+          }
+        }
+
+        // Call it initially and on resize.
+        adjustControlsDisplay();
+        window.addEventListener("resize", adjustControlsDisplay);
+      });
+    </script>
+  </div>
 </body>
 </html>

@@ -90,10 +90,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const card = document.createElement("div");
         card.classList.add("card");
         const totalFlight = calculateFlightTime(entry.departureTime, entry.arrivalTime);
+        // Reformat the date from YYYY-MM-DD to DD/MM/YYYY using Day.js.
+        const formattedDate = dayjs(entry.date, "YYYY-MM-DD").format("DD/MM/YYYY");
         // Build card with a title container and two columns underneath.
         card.innerHTML = `
           <div class="card-title-container">
-            <h3>${entry.date} - Flight from ${entry.departurePoint} to ${entry.arrivalPoint}</h3>
+            <h3>${formattedDate} - Flight from ${entry.departurePoint} to ${entry.arrivalPoint}</h3>
           </div>
           <div class="card-content">
             <div class="card-column">
@@ -127,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const totalFlight = calculateFlightTime(entry.departureTime, entry.arrivalTime);
         return {
           id: entry.id,
-          date: entry.date,
+          date: entry.date, // Stored as YYYY-MM-DD; will be formatted in the column formatter.
           aircraft: entry.aircraft,
           registration: entry.registration,
           name: entry.name,
@@ -165,7 +167,15 @@ document.addEventListener("DOMContentLoaded", () => {
         movableColumns: false,
         responsiveLayout: "hide",
         columns: [
-          { title: "Date", field: "date", sorter: "string" },
+          {
+            title: "Date",
+            field: "date",
+            sorter: "string",
+            formatter: function(cell) {
+              // Format date from YYYY-MM-DD to DD/MM/YYYY
+              return dayjs(cell.getValue(), "YYYY-MM-DD").format("DD/MM/YYYY");
+            }
+          },
           { title: "Aircraft", field: "aircraft", sorter: "string" },
           { title: "Registration", field: "registration", sorter: "string" },
           { title: "Name", field: "name", sorter: "string" },
@@ -186,7 +196,6 @@ document.addEventListener("DOMContentLoaded", () => {
           { title: "Landings", field: "landings", sorter: "number" },
         ]
       });
-      
       
       tabulatorTable.on("tableBuilt", () => {
         tabulatorTable.redraw();
@@ -229,7 +238,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const summaryContainer = document.getElementById("summary-container");
       updateSummaryCards(entriesCache, summaryContainer, currentViewMode, false, false);
       
-
     }, (error) => {
       console.error("Error fetching data:", error);
     });
@@ -241,11 +249,8 @@ document.addEventListener("DOMContentLoaded", () => {
       renderView(entriesCache);
       const summaryContainer = document.getElementById("summary-container");
       updateSummaryCards(entriesCache, summaryContainer, currentViewMode, false, false);
-      
-
     }
   });
-  
   
   // Filter functionality.
   const filterInput = document.getElementById("filter-input");

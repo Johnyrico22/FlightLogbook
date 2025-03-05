@@ -32,28 +32,6 @@ h1 {
   color: #ffffff;
 }
 
-/* Authentication Container Styling */
-#auth-container {
-  font-size: 0.75em;
-  color: #ffffff;
-}
-
-#auth-container button {
-  background-color: #145ead;
-  color: #fff;
-  border: none;
-  border-radius: 3px;
-  padding: 3px 10px;
-  cursor: pointer;
-  font-size: 0.75em;
-  transition: background-color 0.3s ease;
-  margin-left: 10px;
-}
-
-#auth-container button:hover {
-  background-color: #3399ff;
-}
-
 /* ---------------------------
    Mobile Card Layout Styling
 ---------------------------- */
@@ -84,6 +62,8 @@ h1 {
     margin-top: 0;
     color: #003366;
     font-size: 1em;
+    font-weight: 600;
+    margin-block-end: 0.5em;
   }
   
   .card p {
@@ -368,8 +348,29 @@ form button {
   margin-bottom: 20px;
 }
 
+/* Authentication Container Styling */
 #auth-container {
+  font-size: 0.75em;
+  color: #ffffff;
   margin-bottom: 2px;
+  text-align: right;
+}
+
+#auth-container button {
+  background-color: #145ead;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 3px 5px;
+  cursor: pointer;
+  font-size: 0.75em;
+  transition: background-color 0.3s ease;
+  margin-left: 10px;
+  margin-top: 5px;
+}
+
+#auth-container button:hover {
+  background-color: #3399ff;
 }
 
 #auth-container button {
