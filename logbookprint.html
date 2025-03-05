@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Printable Logbook Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .page {
+      width: 100%;
+      margin-bottom: 40px;
+      page-break-after: always;
+      border: 1px solid #000;
+      padding: 10px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+    .page-number {
+      text-align: right;
+      font-weight: bold;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 4px;
+      text-align: center;
+    }
+    .totals {
+      font-weight: bold;
+      background: #eee;
+      padding: 5px;
+    }
+    .signature-box {
+      margin-top: 10px;
+      border: 1px solid #444;
+      height: 50px;
+      padding: 5px;
+    }
+    @media print {
+      .page { margin: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="pages-container">Loading logbook data...</div>
+
+  <!-- Use type="module" to import your firebase configuration and functions -->
+  <script type="module">
+    import { db, auth, minutesToTime, timeToMinutes } from './firebase.js';
+    import { ref, query, orderByChild, equalTo, onValue } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js';
+
+    // Helper function: fetch logbook entries for the current user
+    function fetchLogbookData() {
+      return new Promise((resolve, reject) => {
+        const user = auth.currentUser;
+        if (!user) {
+          reject("No user is logged in.");
+          return;
+        }
+        const logbookRef = ref(db, "logbook");
+        const logbookQuery = query(logbookRef, orderByChild("userId"), equalTo(user.uid));
+        onValue(logbookQuery, (snapshot) => {
+          const data = snapshot.val();
+          if (!data) {
+            resolve([]);
+          } else {
+            let entries = [];
+            for (let id in data) {
+              entries.push({ id, ...data[id] });
+            }
+            // Sort entries by date ascending (oldest first) for cumulative totals
+            entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+            resolve(entries);
+          }
+        }, (error) => {
+          reject(error);
+        });
+      });
+    }
+
+    // Generate the printable report given the logbookData array.
+    function generateReport(logbookData) {
+      const pagesContainer = document.getElementById("pages-container");
+      pagesContainer.innerHTML = ""; // Clear loading text
+
+      // Set rows per page
+      const rowsPerPage = 20;
+      // Variables to hold cumulative totals (all time totals in minutes, counts as numbers)
+      let cumulative = {
+        totalFlightTime: 0,
+        singleEngineSolo: 0,
+        singleEngineDual: 0,
+        multiEngineSolo: 0,
+        multiEngineDual: 0,
+        instrument: 0,
+        takeOffs: 0,
+        landings: 0,
+        dayHours: 0,
+        nightHours: 0
+      };
+
+      // Loop through the entries and create pages.
+      for (let i = 0; i < logbookData.length; i += rowsPerPage) {
+        const pageEntries = logbookData.slice(i, i + rowsPerPage);
+        const pageDiv = document.createElement("div");
+        pageDiv.className = "page";
+
+        // Page Header with page number
+        const pageNumber = Math.floor(i / rowsPerPage) + 1;
+        const header = document.createElement("h2");
+        header.textContent = "Logbook Report - Page " + pageNumber;
+        pageDiv.appendChild(header);
+
+        // Create table with headers.
+        const table = document.createElement("table");
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+        const headers = [
+          "Date", "Total Flight Time", "Single Engine Solo", "Single Engine Dual",
+          "Multi Engine Solo", "Multi Engine Dual", "Instrument Flight Time",
+          "Take Offs", "Landings", "Day Hours", "Night Hours"
+        ];
+        headers.forEach(hText => {
+          const th = document.createElement("th");
+          th.textContent = hText;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+
+        // Process each log entry on this page.
+        pageEntries.forEach(entry => {
+          const row = document.createElement("tr");
+
+          // Assume entry.totalFlightTime is stored as "HH:MM" (if not, adjust accordingly)
+          const flightTimeMinutes = timeToMinutes(entry.totalFlightTime || "00:00");
+          cumulative.totalFlightTime += flightTimeMinutes;
+
+          // Update cumulative totals based on engine type and flight type.
+          if (entry.engineType === "singleEngine") {
+            if (entry.flightType === "solo") {
+              cumulative.singleEngineSolo += flightTimeMinutes;
+            } else if (entry.flightType === "dual") {
+              cumulative.singleEngineDual += flightTimeMinutes;
+            }
+          }
+          if (entry.engineType === "multiEngine") {
+            if (entry.flightType === "solo") {
+              cumulative.multiEngineSolo += flightTimeMinutes;
+            } else if (entry.flightType === "dual") {
+              cumulative.multiEngineDual += flightTimeMinutes;
+            }
+          }
+          // Instrument flight time if applicable
+          if (entry.instrument) {
+            cumulative.instrument += flightTimeMinutes;
+          }
+          // Sum takeOffs and landings (assumed numeric)
+          cumulative.takeOffs += entry.takeOffs ? parseInt(entry.takeOffs, 10) : 0;
+          cumulative.landings += entry.landings ? parseInt(entry.landings, 10) : 0;
+          // Sum day and night hours
+          cumulative.dayHours += timeToMinutes(entry.dayHours || "00:00");
+          cumulative.nightHours += timeToMinutes(entry.nightHours || "00:00");
+
+          // Build table row cells.
+          // Date cell
+          const tdDate = document.createElement("td");
+          tdDate.textContent = entry.date || "";
+          row.appendChild(tdDate);
+          // Total Flight Time cell
+          const tdTotal = document.createElement("td");
+          tdTotal.textContent = entry.totalFlightTime || "00:00";
+          row.appendChild(tdTotal);
+          // Single Engine Solo cell
+          const tdSES = document.createElement("td");
+          tdSES.textContent = (entry.engineType === "singleEngine" && entry.flightType === "solo") ? (entry.totalFlightTime || "00:00") : "";
+          row.appendChild(tdSES);
+          // Single Engine Dual cell
+          const tdSED = document.createElement("td");
+          tdSED.textContent = (entry.engineType === "singleEngine" && entry.flightType === "dual") ? (entry.totalFlightTime || "00:00") : "";
+          row.appendChild(tdSED);
+          // Multi Engine Solo cell
+          const tdMES = document.createElement("td");
+          tdMES.textContent = (entry.engineType === "multiEngine" && entry.flightType === "solo") ? (entry.totalFlightTime || "00:00") : "";
+          row.appendChild(tdMES);
+          // Multi Engine Dual cell
+          const tdMED = document.createElement("td");
+          tdMED.textContent = (entry.engineType === "multiEngine" && entry.flightType === "dual") ? (entry.totalFlightTime || "00:00") : "";
+          row.appendChild(tdMED);
+          // Instrument Flight Time cell
+          const tdInst = document.createElement("td");
+          tdInst.textContent = entry.instrument ? (entry.totalFlightTime || "00:00") : "";
+          row.appendChild(tdInst);
+          // Take Offs cell
+          const tdTO = document.createElement("td");
+          tdTO.textContent = entry.takeOffs || "0";
+          row.appendChild(tdTO);
+          // Landings cell
+          const tdLand = document.createElement("td");
+          tdLand.textContent = entry.landings || "0";
+          row.appendChild(tdLand);
+          // Day Hours cell
+          const tdDay = document.createElement("td");
+          tdDay.textContent = entry.dayHours || "00:00";
+          row.appendChild(tdDay);
+          // Night Hours cell
+          const tdNight = document.createElement("td");
+          tdNight.textContent = entry.nightHours || "00:00";
+          row.appendChild(tdNight);
+
+          tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+        pageDiv.appendChild(table);
+
+        // Add a cumulative totals section for the current page.
+        const totalsDiv = document.createElement("div");
+        totalsDiv.className = "totals";
+        totalsDiv.innerHTML = `
+          <p>Cumulative Totals (up to this page):</p>
+          <p>
+            Total Flight Time: ${minutesToTime(cumulative.totalFlightTime)} &nbsp;|&nbsp;
+            Single Engine Solo: ${minutesToTime(cumulative.singleEngineSolo)} &nbsp;|&nbsp;
+            Single Engine Dual: ${minutesToTime(cumulative.singleEngineDual)} &nbsp;|&nbsp;
+            Multi Engine Solo: ${minutesToTime(cumulative.multiEngineSolo)} &nbsp;|&nbsp;
+            Multi Engine Dual: ${minutesToTime(cumulative.multiEngineDual)} &nbsp;|&nbsp;
+            Instrument: ${minutesToTime(cumulative.instrument)}
+          </p>
+          <p>
+            Take Offs: ${cumulative.takeOffs} &nbsp;|&nbsp;
+            Landings: ${cumulative.landings} &nbsp;|&nbsp;
+            Day Hours: ${minutesToTime(cumulative.dayHours)} &nbsp;|&nbsp;
+            Night Hours: ${minutesToTime(cumulative.nightHours)}
+          </p>
+        `;
+        pageDiv.appendChild(totalsDiv);
+
+        // Add a signature box.
+        const signatureLabel = document.createElement("p");
+        signatureLabel.textContent = "Signature:";
+        pageDiv.appendChild(signatureLabel);
+        const signatureBox = document.createElement("div");
+        signatureBox.className = "signature-box";
+        pageDiv.appendChild(signatureBox);
+
+        // Page footer with page number.
+        const footer = document.createElement("div");
+        footer.className = "page-number";
+        footer.textContent = "Page " + pageNumber;
+        pageDiv.appendChild(footer);
+
+        pagesContainer.appendChild(pageDiv);
+      }
+    }
+
+    // Listen for authentication state; if the user is logged in, fetch data and build the report.
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // Redirect to login if no user is authenticated.
+        window.location.href = "login.html";
+      } else {
+        fetchLogbookData().then((logbookData) => {
+          generateReport(logbookData);
+        }).catch((error) => {
+          console.error("Error fetching logbook data:", error);
+          document.getElementById("pages-container").textContent = "Error loading logbook data.";
+        });
+      }
+    });
+  </script>
+</body>
+</html>
