@@ -34,9 +34,22 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function populateDatalist(datalistId, options) {
-    const datalist = document.getElementById(datalistId);
-    if (!datalist) return;
-    datalist.innerHTML = ""; // Clear any existing options
+    // Try to get an existing datalist element
+    let datalist = document.getElementById(datalistId);
+    // If not present, create it and attach it to the input’s parent
+    if (!datalist) {
+      datalist = document.createElement("datalist");
+      datalist.id = datalistId;
+      // Find the corresponding input field by matching the list attribute
+      const input = document.querySelector(`input[list="${datalistId}"]`);
+      if (input) {
+        input.parentElement.appendChild(datalist);
+      } else {
+        // Or simply append it to the body
+        document.body.appendChild(datalist);
+      }
+    }
+    datalist.innerHTML = "";
     options.forEach((item) => {
       const option = document.createElement("option");
       option.value = item;
