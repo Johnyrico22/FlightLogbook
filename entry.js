@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function populateDatalist(datalistId, options) {
+    console.log(`Populating datalist: ${datalistId} with options:`, options); // Add this line
     // Try to get an existing datalist element
     let datalist = document.getElementById(datalistId);
     // If not present, create it and attach it to the input’s parent
@@ -55,9 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
       option.value = item;
       datalist.appendChild(option);
     });
-  }
-  
-  // Helper: Convert a formatted duration string ("Xh Ym") to minutes.
+
+  }  // Helper: Convert a formatted duration string ("Xh Ym") to minutes.
   function parseDurationToMinutes(durationStr) {
     const match = durationStr.match(/(\d+)\s*h\s*(\d+)\s*m/);
     if (match) {
@@ -213,17 +213,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
-    
+
     // Function to set the form in view mode: disable all inputs and hide the submit button.
     function setViewMode() {
       // Disable all inputs and selects.
-      const elements = form.querySelectorAll("input, select, textarea");
+    const elements = form.querySelectorAll("input, select, textarea");
       elements.forEach(el => {
         el.disabled = true;
       });
       // Hide the submit button.
       const submitBtn = form.querySelector("button[type='submit']");
-      if (submitBtn) {
+    if (submitBtn) {
         submitBtn.style.display = "none";
       }
       // Add an "Edit Entry" button above the delete button if it doesn't already exist.
@@ -234,12 +234,12 @@ document.addEventListener("DOMContentLoaded", () => {
         editButton.textContent = "Edit Entry";
         // Insert edit button before the delete button.
         const deleteBtn = document.getElementById("delete-btn");
-        if (deleteBtn) {
+    if (deleteBtn) {
           deleteBtn.parentElement.insertBefore(editButton, deleteBtn);
         } else {
           form.appendChild(editButton);
-        }
-        // When clicked, switch to edit mode.
+    }
+// When clicked, switch to edit mode.
         editButton.addEventListener("click", () => {
           elements.forEach(el => {
             el.disabled = false;
@@ -250,6 +250,15 @@ document.addEventListener("DOMContentLoaded", () => {
           editButton.remove();
         });
       }
+    }
+  // Ensure the input fields have the correct list attribute
+    const departurePointInput = form.querySelector('input[name="departurePoint"]');
+    if (departurePointInput) {
+      departurePointInput.setAttribute("list", "departure-datalist");
+    }
+    const arrivalPointInput = form.querySelector('input[name="arrivalPoint"]');
+    if (arrivalPointInput) {
+      arrivalPointInput.setAttribute("list", "arrival-datalist");
     }
 
     populateDatalist("departure-datalist", aerodromeList);
