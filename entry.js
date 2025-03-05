@@ -9,6 +9,7 @@ import {
   get
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+import { aerodromeList } from "./aerodromes.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const auth = getAuth();
@@ -31,6 +32,17 @@ document.addEventListener("DOMContentLoaded", () => {
       setupForm();
     }
   });
+
+  function populateDatalist(datalistId, options) {
+    const datalist = document.getElementById(datalistId);
+    if (!datalist) return;
+    datalist.innerHTML = ""; // Clear any existing options
+    options.forEach((item) => {
+      const option = document.createElement("option");
+      option.value = item;
+      datalist.appendChild(option);
+    });
+  }
   
   // Helper: Convert a formatted duration string ("Xh Ym") to minutes.
   function parseDurationToMinutes(durationStr) {
@@ -226,6 +238,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
+
+    populateDatalist("departure-datalist", aerodromeList);
+    populateDatalist("arrival-datalist", aerodromeList);
     
     // Auto-calculate complementary day and night hours.
     function updateNightHours() {
