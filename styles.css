@@ -1,24 +1,22 @@
 /* Overall Page Styling */
 body {
   font-family: Arial, sans-serif;
-  background-color: #f6f8fa;  /* Light, airy blue background */
-  margin: 0; /* Removed global margin */
+  background-color: #f6f8fa;
+  margin: 0;
 }
 
-/* New container for content (excluding header) */
 .container {
-  margin-top: 10px;
-  margin-left: 20px;
-  margin-right: 20px;
+  margin: 10px 20px 0 20px;
 }
-h1 {
-  color: #003366;  /* Dark blue heading */
-  text-align: center;
-}
-h3 {
+
+h1, h3 {
   color: #003366;
 }
-/* Header Styling */
+
+h1 {
+  text-align: center;
+}
+
 #page-header {
   display: flex;
   justify-content: space-between;
@@ -35,17 +33,12 @@ h3 {
   color: #ffffff;
 }
 
-/* ---------------------------
-   Mobile Card Layout Styling
----------------------------- */
-
+/* Mobile Card Layout Styling */
 @media (max-width: 1100px) {
-  /* Hide table view container */
   #tabulator-table {
     display: none;
   }
   
-  /* Mobile cards container */
   #mobile-cards-container {
     display: block;
   }
@@ -63,7 +56,6 @@ h3 {
   
   .card h3 {
     margin-top: 0;
-    color: #003366;
     font-size: 1em;
     font-weight: 600;
     margin-block-end: 0.5em;
@@ -71,35 +63,30 @@ h3 {
   
   .card p {
     margin: 5px 0;
-    color: #003366;
     font-size: 0.95em;
-    white-space: normal;
-    word-wrap: break-word;
   }
-  /* Title container for mobile card */
-.card-title-container {
-  border-bottom: 1px solid #b3d1ff;
-  padding: 0px;
-  margin-bottom: 10px;
-}
+  
+  .card-title-container {
+    border-bottom: 1px solid #b3d1ff;
+    padding: 0;
+    margin-bottom: 10px;
+  }
 
-/* Content area for mobile card */
-.card-content {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
+  .card-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 
-/* Two columns inside card content */
-.card-column {
-  flex: 1;
-  min-width: 45%;
-}
+  .card-column {
+    flex: 1;
+    min-width: 45%;
+  }
 }
 
 /* Controls Container Styling */
 #controls-container {
-  background-color: #e6f2ff;  /* Very light blue background */
+  background-color: #e6f2ff;
   border: 1px solid #b3d1ff;
   border-radius: 5px;
   padding: 10px;
@@ -107,7 +94,6 @@ h3 {
   text-align: center;
 }
 
-/* Buttons Styling */
 #controls-container button {
   background-color: #66b3ff;
   color: #fff;
@@ -126,7 +112,7 @@ h3 {
 
 /* Column Selector Panel Styling */
 #column-selector-panel {
-  display: none;  /* Initially hidden */
+  display: none;
   background-color: #f7fbff;
   border: 1px solid #b3d1ff;
   border-radius: 3px;
@@ -140,14 +126,10 @@ h3 {
   font-size: 0.9em;
 }
 
-/* ---------------------------
-   Tabulator Table Styling
----------------------------- */
-
-/* The main Tabulator container */
+/* Tabulator Table Styling */
 #tabulator-table .tabulator {
-  background-color: #ffffff; /* White background for table body */
-  border: 1px solid #b3d1ff;  /* Light blue border */
+  background-color: #ffffff;
+  border: 1px solid #b3d1ff;
   border-radius: 5px;
 }
 
@@ -156,12 +138,10 @@ h3 {
   font-size: 0.75em;
 }
 
-/* Override default Tabulator header background color */
 #tabulator-table .tabulator-col {
   background-color: #3f76b1 !important;
 }
 
-/* Force header title styling */
 #tabulator-table .tabulator-col .tabulator-col-title {
   white-space: normal !important;
   word-break: break-word !important;
@@ -171,26 +151,23 @@ h3 {
   font-weight: 500;
 }
 
-/* Row styling with alternating colors */
 #tabulator-table .tabulator-row {
   border-bottom: 0px solid #e6f7ff;
   background-color: #ffffff;
 }
 
 #tabulator-table .tabulator-row:nth-child(even) {
-  background-color: #e6f2ff; /* Light blue tint for alternate rows */
+  background-color: #e6f2ff;
 }
 
-/* Cell styling */
 #tabulator-table .tabulator-cell {
   white-space: normal !important;
   word-wrap: break-word !important;
-  word-break: break-all; /* optional: breaks long words if needed */
+  word-break: break-all;
 }
 
-/* Hover effect on rows */
 #tabulator-table .tabulator-row:hover {
-  background-color: #d0e6ff; /* Slightly darker blue on hover */
+  background-color: #d0e6ff;
 }
 
 /* Fallback Basic Table Styling */
@@ -227,36 +204,23 @@ form {
 
 form label {
   display: block;
-  margin: 10px 0;
+  margin: 10px 0 3px 0;
   font-size: 0.9em;
   color: #353535;
-  margin-bottom: 3px;
 }
 
-form input {
+form input, form select, form textarea {
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
   border-radius: 3px;
-  border-width: 1px;
-  border-color: #aaaaaa;
+  border: 1px solid #aaaaaa;
   margin-top: 3px;
 }
 
 form button {
   padding: 10px 20px;
   margin-top: 20px;
-  display: block;
-  width: 100%;
-}
-
-form select {
-  padding: 10px 10px;
-  margin-top: 5px;
-  display: block;
-  width: 100%;
-}
-form textarea {
   display: block;
   width: 100%;
 }
@@ -281,7 +245,7 @@ form textarea {
 
 /* Summary Container Styling */
 #summary-container {
-  background-color: #e6f2ff;  /* Very light blue background */
+  background-color: #e6f2ff;
   border: 1px solid #b3d1ff;
   border-radius: 5px;
   padding: 10px;
@@ -289,42 +253,40 @@ form textarea {
   text-align: center;
   color: #003366;
 }
+
 .summary-more {
   text-align: center;
   margin-top: 10px;
   font-size: 1em;
-  color: #003366;
   font-weight: bold;
 }
+
 .summary-more p {
   margin: 0;
 }
+
 .summary-section {
   margin-bottom: 20px;
 }
 
 .summary-section h3 {
   text-align: center;
-  color: #003366;
   margin-bottom: 10px;
 }
 
-
-/* Flex container for summary cards */
 .summary-cards {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
 }
 
-/* Individual summary card styling */
 .summary-card {
   background-color: #f7fbff;
   border: 1px solid #b3d1ff;
   border-radius: 5px;
   padding: 10px;
   margin: 10px;
-  flex: 1 1 150px;  /* Flexible cards with a minimum width */
+  flex: 1 1 150px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
@@ -333,39 +295,31 @@ form textarea {
   font-size: 0.9em;
 }
 
-.summary-card h3 {
-  margin: 5px 0 0 0;
-  font-size: 1em;
-}
-.summary-card h4 {
+.summary-card h3, .summary-card h4 {
   margin: 5px 0 0 0;
   font-size: 1em;
 }
 
-/* ---------------------------
-   Login Page Styling
----------------------------- */
+/* Login Page Styling */
 #login-container {
-  background-color: #e6f2ff;  /* Very light blue container */
+  background-color: #e6f2ff;
   border: 1px solid #b3d1ff;
   border-radius: 8px;
   padding: 30px;
   max-width: 600px;
   width: 70%;
   text-align: center;
-  margin: 50px auto;  /* Center container horizontally */
+  margin: 50px auto;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 #login-container h2 {
   margin-top: 0;
-  color: #003366;
   font-size: 1.8em;
 }
 
 #login-container p {
   font-size: 1.1em;
-  color: #003366;
   margin: 20px;
 }
 
@@ -414,14 +368,15 @@ form textarea {
   margin-bottom: 15px;
 }
 
-/* RADIO GROUP STYLING */
+/* Radio Group Styling */
 .radio-group {
   display: flex;
-  gap: 0px;
+  gap: 0;
   align-items: left;
   margin-top: 5px;
-  padding: 0px;
+  padding: 0;
 }
+
 .radio-group label {
   display: flex;
   align-items: center;
@@ -430,13 +385,14 @@ form textarea {
   white-space: nowrap;
 }
 
-/* TIME ENTRY STYLING FOR DAY AND NIGHT HOURS */
+/* Time Entry Styling for Day and Night Hours */
 .time-entry {
   display: flex;
   gap: 20px;
   justify-content: space-between;
   margin-top: 5px;
 }
+
 .time-entry label {
   flex: 1;
   display: flex;
@@ -444,6 +400,7 @@ form textarea {
   gap: 10px;
   margin: 0;
 }
+
 .time-entry label input {
   width: auto;
   padding: 8px;

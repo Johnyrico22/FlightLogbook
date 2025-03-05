@@ -17,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Use an auth state listener to ensure we wait for authentication status.
   onAuthStateChanged(auth, (user) => {
     if (!user) {
-      // If no user is signed in, initiate Google sign-in popup.
       const provider = new GoogleAuthProvider();
       signInWithPopup(auth, provider)
         .then((result) => {
@@ -39,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!datalist) {
       datalist = document.createElement("datalist");
       datalist.id = datalistId;
-      // Find the corresponding input field by matching the list attribute.
+      // Try to attach to the corresponding input by its list attribute.
       const input = document.querySelector(`input[list="${datalistId}"]`);
       if (input) {
         input.parentElement.appendChild(datalist);
@@ -79,8 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("log-entry-form");
     if (!form) return;
 
-    // Set up the static datalists for departure and arrival from aerodromeList.
-    // (Assumes the inputs have list="departure-datalist" and list="arrival-datalist".)
+    // Set up datalists for departure and arrival points using the static aerodromeList.
     populateDatalist("departure-datalist", aerodromeList);
     populateDatalist("arrival-datalist", aerodromeList);
 
@@ -253,7 +251,8 @@ document.addEventListener("DOMContentLoaded", () => {
     departureTimeInput.addEventListener("change", updateFlightTime);
     arrivalTimeInput.addEventListener("change", updateFlightTime);
 
-    // Setup autocomplete for departure and arrival using the static aerodromeList.
+    // Setup autocomplete for departure and arrival using the static aerodromeList,
+    // and for aircraft, registration, and name using previous entries.
     setupAutocomplete();
 
     form.addEventListener("submit", async (e) => {
@@ -323,15 +322,44 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Setup autocomplete for departure and arrival fields using the static aerodrome list.
+  // Setup autocomplete: for departure and arrival, use static aerodromeList.
+  // For aircraft, registration, and name, get values from previous log entries.
   function setupAutocomplete() {
     const form = document.getElementById("log-entry-form");
     if (!form) return;
 
+    // Populate departure and arrival datalists from static list.
     populateDatalist("departure-datalist", aerodromeList);
     populateDatalist("arrival-datalist", aerodromeList);
+
+    // Now populate aircraft, registration, and name from previous entries.
+    const logbookRef = ref(db, "logbook");
+    get(logbookRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const entries = snapshot.val();
+          const aircraftSet = new Set();
+          const registrationSet = new Set();
+          const nameSet = new Set();
+
+          for (const key in entries) {
+            const entry = entries[key];
+            if (entry.aircraft) aircraftSet.add(entry.aircraft);
+            if (entry.registration) registrationSet.add(entry.registration);
+            if (entry.name) nameSet.add(entry.name);
+          }
+
+          updateDatalist("aircraft", "aircraft-datalist", aircraftSet);
+          updateDatalist("registration", "registration-datalist", registrationSet);
+          updateDatalist("name", "name-datalist", nameSet);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching previous entries for autocomplete:", error);
+      });
   }
 
+  // Helper function to create or update a datalist for a given field.
   function updateDatalist(fieldName, datalistId, dataSet) {
     const inputField = document.querySelector(`input[name="${fieldName}"]`);
     if (!inputField) return;
