@@ -13,7 +13,7 @@ import { aerodromeList } from "./aerodromes.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const auth = getAuth();
-  
+
   // Use an auth state listener to ensure we wait for authentication status.
   onAuthStateChanged(auth, (user) => {
     if (!user) {
@@ -33,20 +33,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Helper function to create or update a datalist.
   function populateDatalist(datalistId, options) {
-    console.log(`Populating datalist: ${datalistId} with options:`, options); // Add this line
-    // Try to get an existing datalist element
     let datalist = document.getElementById(datalistId);
-    // If not present, create it and attach it to the input’s parent
     if (!datalist) {
       datalist = document.createElement("datalist");
       datalist.id = datalistId;
-      // Find the corresponding input field by matching the list attribute
+      // Find the corresponding input field by matching the list attribute.
       const input = document.querySelector(`input[list="${datalistId}"]`);
       if (input) {
         input.parentElement.appendChild(datalist);
       } else {
-        // Or simply append it to the body
         document.body.appendChild(datalist);
       }
     }
@@ -56,41 +53,46 @@ document.addEventListener("DOMContentLoaded", () => {
       option.value = item;
       datalist.appendChild(option);
     });
+  }
 
-  }  // Helper: Convert a formatted duration string ("Xh Ym") to minutes.
+  // Helper: Convert a formatted duration string ("Xh Ym") to minutes.
   function parseDurationToMinutes(durationStr) {
     const match = durationStr.match(/(\d+)\s*h\s*(\d+)\s*m/);
     if (match) {
       return parseInt(match[1]) * 60 + parseInt(match[2]);
     }
-    // Fallback if not matching expected format:
     const parts = durationStr.split(":");
     if (parts.length === 2) {
       return parseInt(parts[0]) * 60 + parseInt(parts[1]);
     }
     return 0;
   }
-  
+
   // Helper: Convert minutes to a formatted duration string ("Xh Ym")
   function minutesToDurationStr(minutes) {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     return `${h}h ${m}m`;
   }
-  
+
   function setupForm() {
     const form = document.getElementById("log-entry-form");
     if (!form) return;
-    
+
+    // Set up the static datalists for departure and arrival from aerodromeList.
+    // (Assumes the inputs have list="departure-datalist" and list="arrival-datalist".)
+    populateDatalist("departure-datalist", aerodromeList);
+    populateDatalist("arrival-datalist", aerodromeList);
+
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get("id");
     let mode = (id && id !== "new") ? "view" : "edit";
-    
+
     const dayHoursH = form.querySelector("#dayHoursH");
     const dayHoursM = form.querySelector("#dayHoursM");
     const nightHoursH = form.querySelector("#nightHoursH");
     const nightHoursM = form.querySelector("#nightHoursM");
-    
+
     if (id && id !== "new") {
       const entryRef = ref(db, "logbook/" + id);
       onValue(entryRef, (snapshot) => {
@@ -156,13 +158,13 @@ document.addEventListener("DOMContentLoaded", () => {
           form.tacoFinish.value = data.tacoFinish || "";
           form.hobbsFinish.value = data.hobbsFinish || "";
           form.notes.value = data.notes || "";
-          
+
           if (mode === "view") {
             setViewMode();
           }
         }
       }, { onlyOnce: true });
-      
+
       if (!document.getElementById("delete-btn")) {
         const deleteButton = document.createElement("button");
         deleteButton.textContent = "Delete Entry";
@@ -189,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
-    
+
     function setViewMode() {
       const elements = form.querySelectorAll("input, select, textarea");
       elements.forEach(el => { el.disabled = true; });
@@ -214,57 +216,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Function to set the form in view mode: disable all inputs and hide the submit button.
-    function setViewMode() {
-      // Disable all inputs and selects.
-    const elements = form.querySelectorAll("input, select, textarea");
-      elements.forEach(el => {
-        el.disabled = true;
-      });
-      // Hide the submit button.
-      const submitBtn = form.querySelector("button[type='submit']");
-    if (submitBtn) {
-        submitBtn.style.display = "none";
-      }
-      // Add an "Edit Entry" button above the delete button if it doesn't already exist.
-      if (!document.getElementById("edit-btn")) {
-        const editButton = document.createElement("button");
-        editButton.id = "edit-btn";
-        editButton.type = "button";
-        editButton.textContent = "Edit Entry";
-        // Insert edit button before the delete button.
-        const deleteBtn = document.getElementById("delete-btn");
-    if (deleteBtn) {
-          deleteBtn.parentElement.insertBefore(editButton, deleteBtn);
-        } else {
-          form.appendChild(editButton);
-    }
-// When clicked, switch to edit mode.
-        editButton.addEventListener("click", () => {
-          elements.forEach(el => {
-            el.disabled = false;
-          });
-          if (submitBtn) {
-            submitBtn.style.display = "block";
-          }
-          editButton.remove();
-        });
-      }
-    }
-  // Ensure the input fields have the correct list attribute
-    const departurePointInput = form.querySelector('input[name="departurePoint"]');
-    if (departurePointInput) {
-      departurePointInput.setAttribute("list", "departure-datalist");
-    }
-    const arrivalPointInput = form.querySelector('input[name="arrivalPoint"]');
-    if (arrivalPointInput) {
-      arrivalPointInput.setAttribute("list", "arrival-datalist");
-    }
-
-    populateDatalist("departure-datalist", aerodromeList);
-    populateDatalist("arrival-datalist", aerodromeList);
-    
-    // Auto-calculate complementary day and night hours.
     function updateNightHours() {
       const totalMins = getFlightMinutes(form.departureTime.value, form.arrivalTime.value);
       const dayMins = parseInt(dayHoursH.value) * 60 + parseInt(dayHoursM.value);
@@ -272,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
       nightHoursH.value = Math.floor(nightMins / 60);
       nightHoursM.value = nightMins % 60;
     }
-    
+
     function updateDayHours() {
       const totalMins = getFlightMinutes(form.departureTime.value, form.arrivalTime.value);
       const nightMins = parseInt(nightHoursH.value) * 60 + parseInt(nightHoursM.value);
@@ -280,31 +231,29 @@ document.addEventListener("DOMContentLoaded", () => {
       dayHoursH.value = Math.floor(dayMins / 60);
       dayHoursM.value = dayMins % 60;
     }
-    
+
     dayHoursH.addEventListener("change", updateNightHours);
     dayHoursM.addEventListener("change", updateNightHours);
     nightHoursH.addEventListener("change", updateDayHours);
     nightHoursM.addEventListener("change", updateDayHours);
-    
-    // Auto-calculate flight time when departure and arrival times are entered.
+
     const departureTimeInput = form.querySelector('[name="departureTime"]');
     const arrivalTimeInput = form.querySelector('[name="arrivalTime"]');
-    
+
     function updateFlightTime() {
       if (departureTimeInput.value && arrivalTimeInput.value) {
         const totalMins = getFlightMinutes(departureTimeInput.value, arrivalTimeInput.value);
         dayHoursH.value = Math.floor(totalMins / 60);
         dayHoursM.value = totalMins % 60;
-        // Optionally, reset night hours if you want them to default to zero.
         nightHoursH.value = "0";
         nightHoursM.value = "0";
       }
     }
-    
+
     departureTimeInput.addEventListener("change", updateFlightTime);
     arrivalTimeInput.addEventListener("change", updateFlightTime);
-    
-    // Setup autocomplete suggestions for aircraft, registration, departure point, arrival point, and name.
+
+    // Setup autocomplete for departure and arrival using the static aerodromeList.
     setupAutocomplete();
 
     form.addEventListener("submit", async (e) => {
@@ -319,8 +268,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const dayHoursFormatted = `${dayHoursH.value}h ${dayHoursM.value}m`;
       const nightHoursFormatted = `${nightHoursH.value}h ${nightHoursM.value}m`;
       const instrumentFormatted = `${form.querySelector("#instrumentH").value}h ${form.querySelector("#instrumentM").value}m`;
-      
-      // Sanitize text fields using DOMPurify
+
+      // Sanitize text fields using DOMPurify.
       const sanitizedAircraft = DOMPurify.sanitize(form.aircraft.value);
       const sanitizedRegistration = DOMPurify.sanitize(form.registration.value);
       const sanitizedName = DOMPurify.sanitize(form.name.value);
@@ -332,7 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const sanitizedTacoFinish = DOMPurify.sanitize(form.tacoFinish.value);
       const sanitizedHobbsFinish = DOMPurify.sanitize(form.hobbsFinish.value);
       const sanitizedNotes = DOMPurify.sanitize(form.notes.value);
-      
+
       const entryData = {
         date: form.date.value,
         aircraft: sanitizedAircraft,
@@ -357,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
         notes: sanitizedNotes,
         userId: auth.currentUser ? auth.currentUser.uid : null
       };
-      
+
       try {
         if (id && id !== "new") {
           const entryRef = ref(db, "logbook/" + id);
@@ -373,46 +322,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-  
-  // Function to set up autocomplete using previous log entries.
+
+  // Setup autocomplete for departure and arrival fields using the static aerodrome list.
   function setupAutocomplete() {
     const form = document.getElementById("log-entry-form");
     if (!form) return;
-    
-    const logbookRef = ref(db, "logbook");
-    get(logbookRef)
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          const entries = snapshot.val();
-          const aircraftSet = new Set();
-          const registrationSet = new Set();
-          const departureSet = new Set();
-          const arrivalSet = new Set();
-          const nameSet = new Set();
-          
-          for (const key in entries) {
-            const entry = entries[key];
-            if (entry.aircraft) aircraftSet.add(entry.aircraft);
-            if (entry.registration) registrationSet.add(entry.registration);
-            if (entry.departurePoint) departureSet.add(entry.departurePoint);
-            if (entry.arrivalPoint) arrivalSet.add(entry.arrivalPoint);
-            if (entry.name) nameSet.add(entry.name);
-          }
-          
-          // Update or create datalists for each field.
-          updateDatalist("aircraft", "aircraft-datalist", aircraftSet);
-          updateDatalist("registration", "registration-datalist", registrationSet);
-          updateDatalist("departurePoint", "departure-datalist", departureSet);
-          updateDatalist("arrivalPoint", "arrival-datalist", arrivalSet);
-          updateDatalist("name", "name-datalist", nameSet);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching logbook data for autocomplete:", error);
-      });
+
+    populateDatalist("departure-datalist", aerodromeList);
+    populateDatalist("arrival-datalist", aerodromeList);
   }
-  
-  // Helper function to create or update a datalist for a given input field.
+
   function updateDatalist(fieldName, datalistId, dataSet) {
     const inputField = document.querySelector(`input[name="${fieldName}"]`);
     if (!inputField) return;
@@ -420,14 +339,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!datalist) {
       datalist = document.createElement("datalist");
       datalist.id = datalistId;
-      // Attach the datalist to the input field.
       inputField.setAttribute("list", datalistId);
-      // Append the datalist to the input field's parent element.
       inputField.parentElement.appendChild(datalist);
     }
-    // Clear any existing options.
     datalist.innerHTML = "";
-    // Populate the datalist with new options.
     dataSet.forEach((item) => {
       const option = document.createElement("option");
       option.value = item;
