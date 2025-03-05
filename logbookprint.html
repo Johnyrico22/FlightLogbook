@@ -21,6 +21,7 @@
       page-break-after: always;
       border: 1px solid #000;
       padding: 10px;
+      position: relative;
     }
     h2 {
       text-align: center;
@@ -45,17 +46,34 @@
       font-weight: bold;
       background: #eee;
     }
-    .totals {
-      font-weight: bold;
-      background: #ddd;
-      padding: 5px;
-      margin-top: 5px;
+    /* Container for signature block and cumulative totals table */
+    .bottom-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-top: 10px;
     }
     .signature-box {
-      margin-top: 10px;
       border: 1px solid #444;
       height: 50px;
       padding: 5px;
+      flex: 1;
+      margin-right: 20px;
+    }
+    .cumulative-table {
+      border: 1px solid #444;
+      font-size: 11px;
+      border-collapse: collapse;
+      width: auto;
+    }
+    .cumulative-table th,
+    .cumulative-table td {
+      border: 1px solid #444;
+      padding: 4px 8px;
+      text-align: center;
+    }
+    .cumulative-table th {
+      background: #ddd;
     }
     @media print {
       .page { margin: 0; }
@@ -292,87 +310,132 @@
         // Add a totals row for this page.
         const totalRow = document.createElement("tr");
         totalRow.className = "total-row";
-        // Date cell: label the row.
         const tdLabel = document.createElement("td");
         tdLabel.textContent = "Page Totals:";
         totalRow.appendChild(tdLabel);
-        // Departure and Arrival columns empty.
+        // Two empty cells for grouped departure/arrival.
         totalRow.appendChild(document.createElement("td"));
         totalRow.appendChild(document.createElement("td"));
-        // Total Flight Time
         const tdTotalFlight = document.createElement("td");
         tdTotalFlight.textContent = minutesToTime(pageTotals.totalFlightTime);
         totalRow.appendChild(tdTotalFlight);
-        // Single Engine Solo
         const tdPageSES = document.createElement("td");
         tdPageSES.textContent = minutesToTime(pageTotals.singleEngineSolo);
         totalRow.appendChild(tdPageSES);
-        // Single Engine Dual
         const tdPageSED = document.createElement("td");
         tdPageSED.textContent = minutesToTime(pageTotals.singleEngineDual);
         totalRow.appendChild(tdPageSED);
-        // Multi Engine Solo
         const tdPageMES = document.createElement("td");
         tdPageMES.textContent = minutesToTime(pageTotals.multiEngineSolo);
         totalRow.appendChild(tdPageMES);
-        // Multi Engine Dual
         const tdPageMED = document.createElement("td");
         tdPageMED.textContent = minutesToTime(pageTotals.multiEngineDual);
         totalRow.appendChild(tdPageMED);
-        // Instrument Flight Time
         const tdPageInst = document.createElement("td");
         tdPageInst.textContent = minutesToTime(pageTotals.instrument);
         totalRow.appendChild(tdPageInst);
-        // Take Offs
         const tdPageTO = document.createElement("td");
         tdPageTO.textContent = pageTotals.takeOffs;
         totalRow.appendChild(tdPageTO);
-        // Landings
         const tdPageLand = document.createElement("td");
         tdPageLand.textContent = pageTotals.landings;
         totalRow.appendChild(tdPageLand);
-        // Day Hours
         const tdPageDay = document.createElement("td");
         tdPageDay.textContent = minutesToTime(pageTotals.dayHours);
         totalRow.appendChild(tdPageDay);
-        // Night Hours
         const tdPageNight = document.createElement("td");
         tdPageNight.textContent = minutesToTime(pageTotals.nightHours);
         totalRow.appendChild(tdPageNight);
-
         tbody.appendChild(totalRow);
         table.appendChild(tbody);
         pageDiv.appendChild(table);
 
-        // Display cumulative totals (since the beginning) below the table.
-        const cumTotalsDiv = document.createElement("div");
-        cumTotalsDiv.className = "totals";
-        cumTotalsDiv.innerHTML = `
-          <p>Cumulative Totals (up to this page):</p>
-          <p>
-            Total Flight Time: ${minutesToTime(cumulative.totalFlightTime)} &nbsp;|&nbsp;
-            Single Engine Solo: ${minutesToTime(cumulative.singleEngineSolo)} &nbsp;|&nbsp;
-            Single Engine Dual: ${minutesToTime(cumulative.singleEngineDual)} &nbsp;|&nbsp;
-            Multi Engine Solo: ${minutesToTime(cumulative.multiEngineSolo)} &nbsp;|&nbsp;
-            Multi Engine Dual: ${minutesToTime(cumulative.multiEngineDual)} &nbsp;|&nbsp;
-            Instrument: ${minutesToTime(cumulative.instrument)}
-          </p>
-          <p>
-            Take Offs: ${cumulative.takeOffs} &nbsp;|&nbsp;
-            Landings: ${cumulative.landings} &nbsp;|&nbsp;
-            Day Hours: ${minutesToTime(cumulative.dayHours)} &nbsp;|&nbsp;
-            Night Hours: ${minutesToTime(cumulative.nightHours)}
-          </p>
-        `;
-        pageDiv.appendChild(cumTotalsDiv);
+        // Create a flex container for the signature block and cumulative totals.
+        const bottomContainer = document.createElement("div");
+        bottomContainer.className = "bottom-container";
+        
+        // Signature block on the left.
+        const signatureDiv = document.createElement("div");
+        signatureDiv.className = "signature-box";
+        signatureDiv.innerHTML = "<strong>Signature:</strong>";
+        bottomContainer.appendChild(signatureDiv);
+        
+        // Cumulative totals table on the right.
+        const cumulativeTable = document.createElement("table");
+        cumulativeTable.className = "cumulative-table";
+        const cumThead = document.createElement("thead");
+        const cumHeaderRow = document.createElement("tr");
+        const cumHeaders = [
+          "Cumulative Totals",
+          "Total Flight",
+          "SES",
+          "SED",
+          "MES",
+          "MED",
+          "Inst",
+          "TO",
+          "Land",
+          "Day",
+          "Night"
+        ];
+        cumHeaders.forEach(hText => {
+          const th = document.createElement("th");
+          th.textContent = hText;
+          cumHeaderRow.appendChild(th);
+        });
+        cumThead.appendChild(cumHeaderRow);
+        cumulativeTable.appendChild(cumThead);
+        const cumTbody = document.createElement("tbody");
+        const cumRow = document.createElement("tr");
+        // Cumulative label cell.
+        const cumLabel = document.createElement("td");
+        cumLabel.textContent = "Totals:";
+        cumRow.appendChild(cumLabel);
+        // Total Flight Time.
+        const cumTotalFlight = document.createElement("td");
+        cumTotalFlight.textContent = minutesToTime(cumulative.totalFlightTime);
+        cumRow.appendChild(cumTotalFlight);
+        // Single Engine Solo.
+        const cumSES = document.createElement("td");
+        cumSES.textContent = minutesToTime(cumulative.singleEngineSolo);
+        cumRow.appendChild(cumSES);
+        // Single Engine Dual.
+        const cumSED = document.createElement("td");
+        cumSED.textContent = minutesToTime(cumulative.singleEngineDual);
+        cumRow.appendChild(cumSED);
+        // Multi Engine Solo.
+        const cumMES = document.createElement("td");
+        cumMES.textContent = minutesToTime(cumulative.multiEngineSolo);
+        cumRow.appendChild(cumMES);
+        // Multi Engine Dual.
+        const cumMED = document.createElement("td");
+        cumMED.textContent = minutesToTime(cumulative.multiEngineDual);
+        cumRow.appendChild(cumMED);
+        // Instrument.
+        const cumInst = document.createElement("td");
+        cumInst.textContent = minutesToTime(cumulative.instrument);
+        cumRow.appendChild(cumInst);
+        // Take Offs.
+        const cumTO = document.createElement("td");
+        cumTO.textContent = cumulative.takeOffs;
+        cumRow.appendChild(cumTO);
+        // Landings.
+        const cumLand = document.createElement("td");
+        cumLand.textContent = cumulative.landings;
+        cumRow.appendChild(cumLand);
+        // Day Hours.
+        const cumDay = document.createElement("td");
+        cumDay.textContent = minutesToTime(cumulative.dayHours);
+        cumRow.appendChild(cumDay);
+        // Night Hours.
+        const cumNight = document.createElement("td");
+        cumNight.textContent = minutesToTime(cumulative.nightHours);
+        cumRow.appendChild(cumNight);
+        cumTbody.appendChild(cumRow);
+        cumulativeTable.appendChild(cumTbody);
+        bottomContainer.appendChild(cumulativeTable);
 
-        // Signature box.
-        const signatureLabel = document.createElement("p");
-        signatureLabel.textContent = "Signature:";
-        pageDiv.appendChild(signatureLabel);
-        const signatureBox = document.createElement("div");
-        signatureBox.className = "signature-box";
-        pageDiv.appendChild(signatureBox);
+        pageDiv.appendChild(bottomContainer);
 
         // Footer with page number.
         const footer = document.createElement("div");
